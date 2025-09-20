@@ -1,0 +1,113 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal de Prácticas TI – Empresas y practicantes</title>
+  <link rel="stylesheet" href="{% static 'portal/style.css' %}">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="brand">Portal de Prácticas TI</div>
+    <ul class="nav">
+      <li><a href="#">Inicio</a></li>
+      <li><a href="#nosotros">Sobre Nosotros</a></li>
+      <li><a href="#funcionalidades">Publicar Anuncio</a></li>
+      <li><a href="#funcionalidades">Postulantes</a></li>
+      <li><a href="#funcionalidades">Capacitación</a></li>
+      <li><a href="{% url 'login' %}">Login</a></li>
+      <li><a href="{% url 'registro' %}">Registro</a></li>
+    </ul>
+  </header>
+
+  <!-- Hero / Carousel -->
+  <section class="hero">
+    <div class="slider">
+      <div class="track">
+        <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1529336953121-ad3112e1e87b?q=80&w=1600&auto=format&fit=crop');">
+          <div class="overlay">
+            <h1>Conecta con el mejor talento en prácticas profesionales</h1>
+            <p>Publica tus ofertas, evalúa postulantes y gestiona su capacitación en un solo lugar.</p>
+          </div>
+        </div>
+        <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1600&auto=format&fit=crop');">
+          <div class="overlay">
+            <h1>Gestiona entrevistas de forma ágil y organizada</h1>
+            <p>Agenda, confirma y da seguimiento a cada candidato en minutos.</p>
+          </div>
+        </div>
+        <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=1600&auto=format&fit=crop');">
+          <div class="overlay">
+            <h1>Capacita y evalúa con observaciones claras</h1>
+            <p>Capacitadores asignados y evaluación final con nota y feedback.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sobre Nosotros -->
+  <section class="section" id="nosotros">
+    <h2>Sobre Nosotros</h2>
+    <p>Somos una plataforma diseñada para empresas de tecnología que integran estudiantes en prácticas profesionales.
+       Ofrecemos un ecosistema completo para publicar ofertas, recibir postulaciones, organizar entrevistas y dar seguimiento al proceso de capacitación.</p>
+  </section>
+
+  <!-- Funcionalidades -->
+  <section class="section" id="funcionalidades">
+    <h2>Lo que puedes hacer en el portal</h2>
+
+    <div class="grid">
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 11l18-5v12l-18-5v10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7 22v-8" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <h3>Publicar Anuncios</h3>
+        <p>Crea ofertas de práctica y hazlas visibles a cientos de estudiantes de tecnología.</p>
+      </article>
+
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="7" r="4" stroke-width="2"/>
+          <path d="M4 21c0-4 4-7 8-7s8 3 8 7" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <h3>Ver Postulantes</h3>
+        <p>Accede a perfiles, currículums y experiencia de los postulantes en tiempo real.</p>
+      </article>
+
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
+          <path d="M16 2v4M8 2v4M3 10h18" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <h3>Postular a practicas</h3>
+        <p>Envia tus documentos y postula a una practica.</p>
+      </article>
+
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 12l2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="3" y="4" width="18" height="16" rx="2" ry="2" stroke-width="2"/>
+        </svg>
+        <h3>Gestionar postulaciones</h3>
+        <p>Gestiona las postulaciones que hayas hecho y revisa sus estados.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- Contacto -->
+  <section class="section" id="login">
+    <h2>Practicas mas recientes</h2>
+    <p>Aun no se han publicado practicas.</p>
+  </section>
+
+  <footer class="footer">
+    © 2025 SimuTech TI — Todos los derechos reservados. Contacto a: <a href="mailto:simutech@gmail.com">simutech@gmail.com</a>
+  </footer>
+
+</body>
+</html>
