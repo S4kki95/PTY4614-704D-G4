@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Publicar Anuncio - Portal Empresas</title>
+  <link rel="stylesheet" href="{% static 'portal/style1.css' %}">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="brand">Portal de Prácticas TI</div>
+    <ul class="nav">
+      <li><a href="{% url 'empresas' %}">Inicio</a></li>
+      <li><a href="#nosotros">Sobre Nosotros</a></li>
+      <li><a href="#funcionalidades">Postulantes</a></li>
+      <li><a href="#funcionalidades">Anuncios</a></li>
+      <li><a href="#funcionalidades">Capacitación</a></li>
+      <li><a href='#funcionalidades'>Perfil</a></li>
+      <li><a href="{% url 'index' %}">Cerrar Sesion</a></li>
+    </ul>
+  </header>
+
+  <!-- Formulario -->
+  <section class="section">
+    <div class="form-container">
+      <h2>Publicar Anuncio de Práctica</h2>
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label for="id_titulo">Título</label>
+          <input type="text" name="titulo" id="id_titulo" class="form-input" placeholder="Ej: Desarrollador Backend Django" required>
+        </div>
+
+        <br>
+
+        <div class="form-group">
+          <label for="id_descripcion">Descripción</label>
+          <textarea name="descripcion" id="id_descripcion" class="form-textarea" rows="5" placeholder="Describe las tareas y requisitos..." required></textarea>
+        </div>
+
+        <br>
+
+        <div class="form-group">
+          <label for="id_ubicacion">Ubicación</label>
+          <input type="text" name="ubicacion" id="id_ubicacion" class="form-input" placeholder="Ciudad o remoto" required>
+        </div>
+
+        <br>
+
+        <div class="form-group">
+          <label for="id_modalidad">Modalidad</label>
+          <select name="modalidad" id="id_modalidad" class="form-select">
+            <option value="presencial">Presencial</option>
+            <option value="remoto">Remoto</option>
+            <option value="mixto">Mixto</option>
+          </select>
+        </div>
+
+        <br>
+
+        <div class="form-group">
+          <label for="id_fecha_inicio">Fecha de inicio</label>
+          <input type="date" name="fecha_inicio" id="id_fecha_inicio" class="form-input" required>
+        </div>
+
+        <br>
+
+        <div class="form-group">
+          <label for="id_fecha_fin">Fecha de fin</label>
+          <input type="date" name="fecha_fin" id="id_fecha_fin" class="form-input" required>
+        </div>
+
+        <br>
+
+        <div class="form-group">
+          <label for="id_cupos">Cupos disponibles</label>
+          <input type="number" name="cupos" id="id_cupos" class="form-input" min="1" value="1" required>
+        </div>
+
+        <br>
+
+        <button type="submit">Publicar Anuncio</button>
+      </form>
+    </div>
+  </section>
+
+  <footer class="footer">
+    © 2025 SimuTech TI — Todos los derechos reservados. Contacto a: <a href="mailto:simutech@gmail.com">simutech@gmail.com</a>
+  </footer>
+
+</body>
+</html>
