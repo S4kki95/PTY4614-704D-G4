@@ -34,4 +34,7 @@ urlpatterns = [
     path("admin/analytics/", views.admin_analytics, name="admin_analytics"),
     # Friendly alias to avoid confusion with Django Admin at /admin/
     path("analytics/", views.admin_analytics, name="analytics"),
+    # Admin approval URLs
+    path("admin/pending-users/", views.admin_pending_users, name="admin_pending_users"),
+    path("admin/approve-user/<int:user_id>/", views.admin_approve_user, name="admin_approve_user"),
 ]

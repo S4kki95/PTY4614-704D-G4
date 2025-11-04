@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Estado de tu solicitud de registro</title>
+</head>
+<body>
+    <h2>Respuesta a tu solicitud de registro</h2>
+    
+    <p>Estimado/a {{ user.username }},</p>
+    
+    <p>Lamentamos informarte que tu solicitud de registro en el Portal de Prácticas TI ha sido rechazada.</p>
+
+    <p>Si crees que esto es un error o necesitas más información, por favor contacta con nuestro equipo de soporte.</p>
+
+    <p>Datos de la solicitud:</p>
+    <ul>
+        <li>Nombre de usuario: {{ user.username }}</li>
+        <li>Correo electrónico: {{ user.email }}</li>
+        <li>Tipo de cuenta solicitada: {{ user.get_role_display }}</li>
+    </ul>
+
+    <p>Saludos cordiales,<br>
+    El equipo del Portal de Prácticas TI</p>
+</body>
+</html>

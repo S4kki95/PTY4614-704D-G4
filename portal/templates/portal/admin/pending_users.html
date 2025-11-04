@@ -1,0 +1,100 @@
+{% extends 'admin/base_site.html' %}
+{% load static %}
+
+{% block extrastyle %}
+<style>
+    .user-list {
+        margin: 20px;
+        padding: 20px;
+        background: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .user-card {
+        border: 1px solid #ddd;
+        margin-bottom: 10px;
+        padding: 15px;
+        border-radius: 4px;
+    }
+    .user-info {
+        margin-bottom: 10px;
+    }
+    .actions {
+        display: flex;
+        gap: 10px;
+    }
+    .btn {
+        padding: 5px 15px;
+        border-radius: 3px;
+        cursor: pointer;
+        border: none;
+    }
+    .btn-approve {
+        background-color: #28a745;
+        color: white;
+    }
+    .btn-reject {
+        background-color: #dc3545;
+        color: white;
+    }
+    .messages {
+        margin: 10px 20px;
+        padding: 10px;
+        border-radius: 4px;
+    }
+    .success {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .error {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="user-list">
+    <h1>Usuarios pendientes de aprobación</h1>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="{% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if users %}
+        {% for user in users %}
+            <div class="user-card">
+                <div class="user-info">
+                    <h3>{{ user.username }}</h3>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    <p><strong>Rol:</strong> {{ user.get_role_display }}</p>
+                    {% if user.company_name %}
+                        <p><strong>Empresa:</strong> {{ user.company_name }}</p>
+                    {% endif %}
+                    <p><strong>Fecha de registro:</strong> {{ user.date_joined|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div class="actions">
+                    <form method="post" action="{% url 'admin_approve_user' user.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="approve">
+                        <button type="submit" class="btn btn-approve">Aprobar</button>
+                    </form>
+                    <form method="post" action="{% url 'admin_approve_user' user.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="reject">
+                        <button type="submit" class="btn btn-reject" onclick="return confirm('¿Estás seguro de que deseas rechazar y eliminar este usuario?')">Rechazar</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No hay usuarios pendientes de aprobación.</p>
+    {% endif %}
+</div>
+{% endblock %}

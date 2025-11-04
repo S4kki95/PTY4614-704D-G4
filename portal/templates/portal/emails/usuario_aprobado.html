@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tu cuenta ha sido aprobada</title>
+</head>
+<body>
+    <h2>¡Felicitaciones! Tu cuenta ha sido aprobada</h2>
+    
+    <p>Estimado/a {{ user.username }},</p>
+    
+    <p>Nos complace informarte que tu cuenta ha sido aprobada. Ya puedes iniciar sesión en nuestro portal utilizando tus credenciales.</p>
+
+    <p>Datos de tu cuenta:</p>
+    <ul>
+        <li>Nombre de usuario: {{ user.username }}</li>
+        <li>Correo electrónico: {{ user.email }}</li>
+        <li>Tipo de cuenta: {{ user.get_role_display }}</li>
+    </ul>
+
+    <p>Puedes iniciar sesión haciendo clic en el siguiente enlace:</p>
+    <p><a href="http://{{ request.get_host }}{% url 'login' %}">Iniciar sesión</a></p>
+
+    <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
+
+    <p>¡Bienvenido/a a nuestro portal!</p>
+
+    <p>Saludos cordiales,<br>
+    El equipo del Portal de Prácticas TI</p>
+</body>
+</html>

@@ -8,6 +8,7 @@ import re
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -16,7 +17,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from supabase import create_client, Client
 from django.db.models import Q, Count
 
-from portal.models import AnuncioPractica, PerfilEmpresa, PerfilPostulante, Postulacion, FichaCapacitacion 
+from portal.models import AnuncioPractica, PerfilEmpresa, PerfilPostulante, Postulacion, FichaCapacitacion, CustomUser
 from decimal import Decimal
 from .forms import EmailLoginForm, PerfilEmpresaForm, PerfilPostulanteForm, FichaCapacitacionForm, RegistroEvaluacionForm
 from .forms import CustomUserCreationForm, AnuncioPracticaForm
@@ -29,6 +30,9 @@ def login_view(request):
         form = EmailLoginForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
+            if not user.is_approved:
+                messages.error(request, "Tu cuenta está pendiente de aprobación. Por favor, espera el correo de confirmación.")
+                return redirect("login")
             login(request, user)
             messages.success(request, "Has iniciado sesión correctamente.", extra_tags='from_login')
 
@@ -56,13 +60,42 @@ def logout_view(request):
     logout(request)
     return redirect("login")
 
+from django.core.mail import send_mail
+from django.conf import settings
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+
 def registro_view(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Cuenta creada con éxito. Ahora puedes iniciar sesión.")
-            return redirect("login")  # Ajusta según tu URL de login
+            user = form.save(commit=False)
+            user.is_approved = False
+            user.save()
+            
+            # Preparar el contenido del correo
+            html_message = render_to_string('portal/emails/nuevo_registro.html', {
+                'user': user,
+                'role': user.get_role_display(),
+                'company_name': user.company_name if user.role == 'empresa' else None,
+            })
+            plain_message = strip_tags(html_message)
+            
+            # Enviar correo al administrador
+            try:
+                send_mail(
+                    subject='Nuevo usuario registrado - Pendiente de aprobación',
+                    message=plain_message,
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[settings.ADMIN_EMAIL],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
+                messages.success(request, "Cuenta creada con éxito. Un administrador revisará tu solicitud y recibirás un correo cuando sea aprobada.")
+            except Exception as e:
+                messages.warning(request, "Cuenta creada, pero hubo un problema al enviar la notificación al administrador. Por favor, contacta al soporte.")
+            
+            return redirect("login")
         else:
             messages.error(request, "Por favor corrige los errores en el formulario.")
     else:
@@ -843,3 +876,59 @@ def admin_analytics(request):
         'por_tipo': list(por_tipo),
         'logs': logs,
     })
+
+def admin_required(user):
+    return user.is_authenticated and user.is_staff
+
+@user_passes_test(admin_required, login_url='login')
+def admin_pending_users(request):
+    # Obtener usuarios pendientes de aprobación
+    pending_users = CustomUser.objects.filter(is_approved=False)
+    return render(request, 'portal/admin/pending_users.html', {'users': pending_users})
+
+@user_passes_test(admin_required, login_url='login')
+def admin_approve_user(request, user_id):
+    if request.method == 'POST':
+        user = get_object_or_404(CustomUser, id=user_id)
+        action = request.POST.get('action')
+        
+        if action == 'approve':
+            user.is_approved = True
+            user.save()
+            
+            # Enviar correo de aprobación al usuario
+            try:
+                html_message = render_to_string('portal/emails/usuario_aprobado.html', {'user': user})
+                plain_message = strip_tags(html_message)
+                send_mail(
+                    subject='Tu cuenta ha sido aprobada',
+                    message=plain_message,
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[user.email],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
+                messages.success(request, f"Usuario {user.username} aprobado y notificado.")
+            except Exception as e:
+                messages.warning(request, f"Usuario aprobado pero hubo un problema al enviar el correo de notificación.")
+        
+        elif action == 'reject':
+            # Enviar correo de rechazo antes de eliminar
+            try:
+                html_message = render_to_string('portal/emails/usuario_rechazado.html', {'user': user})
+                plain_message = strip_tags(html_message)
+                send_mail(
+                    subject='Estado de tu solicitud de registro',
+                    message=plain_message,
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[user.email],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
+            except Exception:
+                pass
+            
+            user.delete()
+            messages.success(request, f"Usuario {user.username} rechazado y eliminado del sistema.")
+        
+    return redirect('admin_pending_users')

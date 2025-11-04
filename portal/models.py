@@ -18,6 +18,7 @@ class CustomUser(AbstractUser):
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="alumno")
     company_name = models.CharField(max_length=255, blank=True, null=True)  # Solo para empresas
+    is_approved = models.BooleanField(default=False)  # Campo para aprobación de usuario
     # Si el usuario es "capacitador", debe estar ligado a una empresa existente
     company = models.ForeignKey(
         settings.AUTH_USER_MODEL,

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Nuevo usuario registrado</title>
+</head>
+<body>
+    <h2>Nuevo usuario registrado - Pendiente de aprobación</h2>
+    
+    <p>Se ha registrado un nuevo usuario en el sistema:</p>
+    
+    <ul>
+        <li><strong>Nombre de usuario:</strong> {{ user.username }}</li>
+        <li><strong>Correo electrónico:</strong> {{ user.email }}</li>
+        <li><strong>Tipo de usuario:</strong> {{ role }}</li>
+        {% if company_name %}
+        <li><strong>Nombre de la empresa:</strong> {{ company_name }}</li>
+        {% endif %}
+    </ul>
+
+    <p>Para aprobar o rechazar este usuario, por favor ingrese al panel de administración.</p>
+
+    <p>Este es un correo automático, por favor no responder.</p>
+</body>
+</html>
