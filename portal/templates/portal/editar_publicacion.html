@@ -1,0 +1,140 @@
+{% load static %}
+<div class="form-container">
+    <link rel="stylesheet" href="{% static 'portal/style6.css' %}">
+
+    <form method="post" action="{% url 'editar_publicacion' anuncio.id %}" class="form-editar" {% if readonly %}data-readonly="true"{% endif %}>
+        {% csrf_token %}
+
+        <h3 style="text-align:center; margin-top:0;">Editar Publicación</h3>
+
+        <!-- Título -->
+        <div class="form-group">
+            <label for="id_titulo">Título</label>
+         <input type="text" name="titulo" id="id_titulo"
+             value="{{ form.titulo.value|default_if_none:'' }}" {% if readonly %}disabled{% endif %} required>
+        </div>
+
+        <!-- Descripción -->
+        <div class="form-group">
+            <label for="id_descripcion">Descripción</label>
+            <textarea name="descripcion" id="id_descripcion" class="autosize" rows="2" {% if readonly %}disabled{% endif %} required>{{ form.descripcion.value|default_if_none:'' }}</textarea>
+        </div>
+
+        <!-- Requisitos -->
+        <div class="form-group">
+            <label for="id_requisitos">Requisitos</label>
+            <textarea name="requisitos" id="id_requisitos" class="autosize" rows="2" {% if readonly %}disabled{% endif %}>{{ form.requisitos.value|default_if_none:'' }}</textarea>
+        </div>
+
+        <!-- Tipo de práctica -->
+        <div class="form-group">
+            <label for="id_tipo_practica">Tipo de práctica</label>
+                        {% if readonly %}
+                            <input type="text" value="{{ form.tipo_practica.value|default_if_none:'' }}" disabled>
+                        {% else %}
+                            {{ form.tipo_practica }}
+                        {% endif %}
+        </div>
+
+        <!-- Duración y jornada -->
+        <div class="form-inline">
+                        <div class="form-group">
+                                <label for="id_duracion_meses">Duración (meses)</label>
+                                {% if readonly %}
+                                    <input type="text" value="{{ form.duracion_meses.value|default_if_none:'' }}" disabled>
+                                {% else %}
+                                    {{ form.duracion_meses }}
+                                {% endif %}
+                        </div>
+
+            <div class="form-group">
+                <label for="id_jornada">Jornada</label>
+                                {% if readonly %}
+                                    <input type="text" value="{{ form.jornada.value|default_if_none:'' }}" disabled>
+                                {% else %}
+                                    {{ form.jornada }}
+                                {% endif %}
+            </div>
+        </div>
+
+                <!-- Cantidad de horas -->
+                <div class="form-group">
+                        <label for="id_cantidad_horas">Cantidad de horas</label>
+                        {% if readonly %}
+                            <input type="text" value="{{ form.cantidad_horas.value|default_if_none:'' }}" disabled>
+                        {% else %}
+                            {{ form.cantidad_horas }}
+                        {% endif %}
+                </div>
+
+        <!-- Ubicación -->
+        <div class="form-group">
+            <label for="id_ubicacion">Ubicación</label>
+         <input type="text" name="ubicacion" id="id_ubicacion"
+             value="{{ form.ubicacion.value|default_if_none:'' }}" {% if readonly %}disabled{% endif %} required>
+        </div>
+
+        <!-- Modalidad -->
+        <div class="form-group">
+            <label for="id_modalidad">Modalidad</label>
+                        {% if readonly %}
+                            <input type="text" value="{{ form.modalidad.value|default_if_none:'' }}" disabled>
+                        {% else %}
+                            {{ form.modalidad }}
+                        {% endif %}
+        </div>
+
+        <!-- Cupos -->
+        <div class="form-group">
+            <label for="id_cupos">Cupos</label>
+         <input type="number" name="cupos" id="id_cupos"
+             value="{{ form.cupos.value|default_if_none:'' }}" {% if readonly %}disabled{% endif %} min="1" required>
+        </div>
+
+        <!-- Botón -->
+                {% if not readonly %}
+                    <div class="form-actions">
+                            <button type="submit" class="btn-primary">Guardar cambios</button>
+                    </div>
+                {% endif %}
+    </form>
+</div>
+ 
+<script>
+// Autosize textareas with class 'autosize'
+(function(){
+    function autoSizeTextarea(el){
+        if(!el) return;
+        el.style.height = 'auto';
+        var newHeight = el.scrollHeight;
+        el.style.height = newHeight + 'px';
+    }
+
+    function initAutosize(){
+        var nodes = document.querySelectorAll('.autosize');
+        nodes.forEach(function(n){
+            n.style.overflow = 'hidden';
+            n.style.resize = 'none';
+            autoSizeTextarea(n);
+            n.addEventListener('input', function(){ autoSizeTextarea(n); });
+        });
+
+        // Retry shortly after load in case fonts or other content changed dimensions
+        setTimeout(function(){
+            nodes.forEach(function(n){ autoSizeTextarea(n); });
+        }, 120);
+    }
+
+    // Ensure we run on DOM ready, full load, and when fonts finish loading
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAutosize);
+    } else {
+        initAutosize();
+    }
+
+    window.addEventListener('load', initAutosize);
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(initAutosize).catch(function(){ /* ignore */ });
+    }
+})();
+</script>

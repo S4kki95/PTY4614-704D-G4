@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Portal Prácticas TI</title>
+  <link rel="stylesheet" href="{% static 'portal/style3.css' %}">
+</head>
+<body>
+
+  <!-- Header igual que en index -->
+  <header class="header">
+    <div class="brand">Portal de Prácticas TI</div>
+    <ul class="nav">
+      <li><a href="{% url 'index' %}">Inicio</a></li>
+      <li><a href="{% url 'registro' %}">Registro</a></li>
+    </ul>
+  </header>
+
+  <!-- Contenedor de login -->
+  <section class="section">
+    <div class="form-grid login-container">
+      <h2>Iniciar Sesión</h2>
+      
+      {% if messages %}
+        {% for msg in messages %}
+          {% if "sesión" in msg|stringformat:"s" %}
+            <p style="color:green;">{{ msg }}</p>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+      
+      <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <label for="id_username">Correo:</label>
+        {{ form.username }}
+        {% if form.username.errors %}
+          <div class="error" style="color:red;">{{ form.username.errors }}</div>
+        {% endif %}
+
+        <label for="id_password">Contraseña:</label>
+        {{ form.password }}
+        {% if form.password.errors %}
+          <div class="error" style="color:red;">{{ form.password.errors }}</div>
+        {% endif %}
+
+        <button type="submit">Ingresar</button>
+      </form>
+
+      <p style="margin-top:15px; text-align:center;">
+        ¿No tienes cuenta? 
+        <a href="{% url 'registro' %}" style="color:var(--blue-600); font-weight:600;">Regístrate aquí</a>
+      </p>
+    </div>
+  </section>
+  {% include 'portal/partials/_footer.html' %}
+
+</body>
+</html>

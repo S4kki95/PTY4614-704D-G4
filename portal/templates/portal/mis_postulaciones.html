@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mis Postulaciones</title>
+  <link rel="stylesheet" href="{% static 'portal/style2.css' %}">
+  <style>
+    .status-pendiente { color: orange; font-weight: bold; }
+    .status-aceptado { color: green; font-weight: bold; }
+    .status-rechazado { color: red; font-weight: bold; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border-bottom: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="brand">Portal de Prácticas TI</div>
+  <ul class="nav">
+    <li><a href="{% url 'portal_practicantes' %}">Inicio</a></li>
+    <li><a href="{% url 'listar_publicaciones' %}">Buscar Prácticas</a></li>
+    <li><a href="{% url 'mis_postulaciones' %}" class="active">Mis Postulaciones</a></li>
+    <li><a href="{% url 'perfil_postulante' %}">Perfil</a></li>
+    <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
+  </ul>
+</header>
+
+<section class="section">
+  <h2>Mis Postulaciones</h2>
+
+  {% if postulaciones %}
+    <table>
+      <thead>
+        <tr>
+          <th>Título de la práctica</th>
+          <th>Empresa</th>
+          <th>Ubicación</th>
+          <th>Fecha de postulación</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in postulaciones %}
+          <tr>
+            <td>{{ p.anuncio.titulo }}</td>
+            <td>{{ p.anuncio.empresa.company_name }}</td>
+            <td>{{ p.anuncio.ubicacion }}</td>
+            <td>{{ p.fecha_postulacion }}</td>
+            <td>
+              {% if p.estado == "pendiente" %}
+                <span class="status-pendiente">Pendiente</span>
+              {% elif p.estado == "aceptado" %}
+                <span class="status-aceptado">Aceptado</span>
+              {% elif p.estado == "rechazado" %}
+                <span class="status-rechazado">Rechazado</span>
+              {% else %}
+                {{ p.estado }}
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No tienes postulaciones registradas aún.</p>
+  {% endif %}
+</section>
+
+{% include 'portal/partials/_footer.html' %}
+
+</body>
+</html>

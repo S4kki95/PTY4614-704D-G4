@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Postulaciones Recibidas</title>
+  <link rel="stylesheet" href="{% static 'portal/style2.css' %}">
+  <style>
+    .status-pendiente { color: orange; font-weight: bold; }
+    .status-aceptado { color: green; font-weight: bold; }
+    .status-rechazado { color: red; font-weight: bold; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border-bottom: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    a.btn {
+      padding: 6px 10px;
+      margin: 2px;
+      border-radius: 5px;
+      text-decoration: none;
+      color: white;
+    }
+    .btn-aceptar { background-color: green; }
+    .btn-rechazar { background-color: red; }
+    .btn-cv { background-color: #2563eb; }
+  </style>
+</head>
+<body data-role="{{ user.role }}">
+
+<header class="header">
+  <div class="brand">Portal de Prácticas TI – Empresa</div>
+  <ul class="nav">
+    <li><a href="{% url 'portal_empresas' %}">Inicio</a></li>
+    <li><a href="{% url 'publicar_anuncio' %}">Publicar Anuncio</a></li> 
+    <li><a href="{% url 'gestionar_publicaciones' %}">Gestionar Publicaciones</a></li>
+    <li><a href="{% url 'perfil_empresa' %}">Perfil</a></li>
+    <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
+  </ul>
+</header>
+
+<section class="section">
+  <h2>Postulaciones Recibidas</h2>
+
+  {% if postulaciones %}
+    <style>
+  .container { display:flex; gap:24px; height: calc(100vh - 120px); }
+  .sidebar { width:360px; border-right:1px solid #ccc; overflow-y:auto; background:#f8f9fa; padding:10px; }
+      .postulante-item { background:#fff; border-radius:8px; padding:12px; margin-bottom:10px; box-shadow:0 1px 3px rgba(0,0,0,0.1); cursor:pointer; transition: background 0.2s; }
+      .postulante-item:hover { background:#e7f0ff; }
+      .postulante-item h4 { margin:0; color:#004aad; }
+      .postulante-item small { color: gray; }
+      .detalle { flex-grow:1; padding:30px; overflow-y:auto; display:flex; justify-content:center; align-items:flex-start; }
+      .detalle > * { width:100%; max-width:900px; margin:0 auto; }
+  .detail-card { background:#fff; padding:20px; border-radius:10px; box-shadow:0 1px 3px rgba(0,0,0,0.08); width:760px; max-width:760px; }
+      .info-grid { display:grid; grid-template-columns: 160px 1fr; column-gap:12px; row-gap:10px; }
+      .label { color:#64748b; font-weight:600; }
+  .value { color:#0f172a; word-break: break-word; overflow-wrap: anywhere; }
+      .actions { margin-top:16px; display:flex; gap:10px; }
+      .btn-s { padding:8px 12px; border-radius:6px; color:#fff; text-decoration:none; display:inline-block; }
+      .btn-acc { background:#16a34a; }
+      .btn-rej { background:#dc2626; }
+      .btn-cv { background:#2563eb; }
+      .status-pendiente { color: orange; font-weight:700; }
+      .status-aceptado { color: green; font-weight:700; }
+      .status-rechazado { color: red; font-weight:700; }
+
+      /* Responsive fallback */
+      @media (max-width: 1024px) {
+        .container { flex-direction: column; height: auto; }
+        .sidebar { width: 100%; border-right: none; }
+        .detalle > * { max-width: 100%; }
+        .detail-card { width: 100%; max-width: 100%; }
+      }
+    </style>
+
+    <div class="container">
+      <div class="sidebar">
+        {% for p in postulaciones %}
+          <div class="postulante-item"
+               data-id="{{ p.id }}"
+               data-nombre="{{ p.postulante.nombre|default_if_none:'' }}"
+               data-apellido="{{ p.postulante.apellido_pat|default_if_none:'' }}"
+               data-rut="{{ p.postulante.rut|default_if_none:'' }}"
+               data-telefono="{{ p.postulante.telefono|default_if_none:'' }}"
+               data-correo="{{ p.postulante.correo|default_if_none:'' }}"
+               data-anuncio="{{ p.anuncio.titulo|default_if_none:'' }}"
+               data-institucion="{{ p.postulante.institucion|default_if_none:'' }}"
+               data-cv="{{ p.postulante.cv|default_if_none:'' }}"
+               data-view-cv-url="{% url 'ver_cv_postulacion' p.id %}"
+               data-fecha="{{ p.fecha_postulacion|date:'d-m-Y' }}"
+               data-estado="{{ p.estado }}"
+               data-accept-url="{% url 'cambiar_estado_postulacion' p.id 'aceptado' %}"
+               data-reject-url="{% url 'cambiar_estado_postulacion' p.id 'rechazado' %}">
+            <h4>{{ p.postulante.nombre }} {{ p.postulante.apellido_pat }}</h4>
+            <small>A: {{ p.anuncio.titulo }}</small>
+          </div>
+        {% empty %}
+          <p>No hay postulaciones a tus prácticas aún.</p>
+        {% endfor %}
+      </div>
+
+      <div class="detalle" id="detalle">
+        <p>Selecciona una postulación para ver sus detalles.</p>
+      </div>
+    </div>
+
+    <script>
+      const IS_EMPRESA = (document.body.dataset.role === 'empresa');
+      const detail = document.getElementById('detalle');
+      document.addEventListener('click', (e) => {
+        const card = e.target.closest('.postulante-item');
+        if (card && card.dataset.id) {
+          mostrarDetalle(card);
+        }
+      });
+      function mostrarDetalle(el) {
+        document.querySelectorAll('.postulante-item.active').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        const d = el.dataset;
+        const estadoClass = d.estado === 'pendiente' ? 'status-pendiente' : (d.estado === 'aceptado' ? 'status-aceptado' : 'status-rechazado');
+  let acciones = '';
+  if (d.cv) {
+    acciones += '<a class="btn-s btn-cv" href="' + d.viewCvUrl + '" target="_blank" rel="noopener">Ver CV</a>';
+    acciones += ' <a class="btn-s" style="background:#475569" href="' + d.viewCvUrl + '?download=1" target="_blank" rel="noopener">Descargar</a>';
+  }
+        else acciones += '<span style="color:#6b7280;">Sin CV</span>';
+        if (IS_EMPRESA) {
+          if (d.estado !== 'aceptado') acciones += ' <a class="btn-s btn-acc" href="' + d.acceptUrl + '">Aceptar</a>';
+          if (d.estado !== 'rechazado') acciones += ' <a class="btn-s btn-rej" href="' + d.rejectUrl + '">Rechazar</a>';
+        }
+        const html =
+          '<div class="detail-card">' +
+            '<div class="info-grid">' +
+              '<div class="label">Postulante:</div><div class="value">' + d.nombre + ' ' + d.apellido + '</div>' +
+              '<div class="label">RUT:</div><div class="value">' + (d.rut || '-') + '</div>' +
+              '<div class="label">Teléfono:</div><div class="value">' + (d.telefono || '-') + '</div>' +
+              '<div class="label">Correo:</div><div class="value">' + d.correo + '</div>' +
+              '<div class="label">Institución:</div><div class="value">' + (d.institucion || '-') + '</div>' +
+              '<div class="label">Anuncio:</div><div class="value">' + d.anuncio + '</div>' +
+              '<div class="label">Fecha:</div><div class="value">' + d.fecha + '</div>' +
+              '<div class="label">Estado:</div><div class="value ' + estadoClass + '">' + d.estado.charAt(0).toUpperCase() + d.estado.slice(1) + '</div>' +
+            '</div>' +
+            '<div class="actions">' + acciones + '</div>' +
+          '</div>';        
+        detail.innerHTML = html;
+      }
+      const first = document.querySelector('.postulante-item');
+      if (first) mostrarDetalle(first);
+    </script>
+  {% else %}
+    <p>No hay postulaciones a tus prácticas aún.</p>
+  {% endif %}
+</section>
+
+{% include 'portal/partials/_footer.html' %}
+
+</body>
+</html>

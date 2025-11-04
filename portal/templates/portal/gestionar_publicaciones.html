@@ -1,0 +1,227 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestionar Publicaciones</title>
+  <link rel="stylesheet" href="{% static 'portal/style4.css' %}">
+  <style>
+    .container {
+      display: flex;
+      height: calc(100vh - 120px);
+    }
+
+    /* --- LADO IZQUIERDO --- */
+    .sidebar {
+      width: 35%;
+      border-right: 1px solid #ccc;
+      overflow-y: auto;
+      background: #f8f9fa;
+      padding: 10px;
+    }
+
+    .anuncio-item {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .anuncio-item:hover {
+      background: #e7f0ff;
+    }
+
+    .anuncio-item h4 {
+      margin: 0;
+      color: #004aad;
+    }
+
+    .anuncio-item small {
+      color: gray;
+    }
+
+    /* --- LADO DERECHO --- */
+    .detalle {
+      flex-grow: 1;
+      padding: 30px;
+      overflow-y: auto;
+      display: flex; /* convierte el panel en un contenedor flex */
+      justify-content: center; /* centra horizontalmente su contenido */
+      align-items: flex-start; /* mantener alineado al inicio verticalmente */
+    }
+
+    .detalle h2 {
+      margin-top: 0;
+    }
+
+    .detalle .info {
+      margin-bottom: 15px;
+    }
+
+    .detalle .info label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .detalle .info span {
+      display: block;
+      background: #f1f1f1;
+      padding: 8px;
+      border-radius: 5px;
+    }
+
+    .acciones {
+      margin-top: 20px;
+    }
+
+    /* Centrar el contenido interno y limitar su ancho para que no estire en exceso */
+    .detalle > * {
+      width: 100%;
+      max-width: 900px; /* ajusta este valor según necesites */
+      margin: 0 auto;
+    }
+
+    .acciones button,
+    .acciones a {
+      background: #004aad;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+
+    .acciones a {
+      background: #dc3545;
+    }
+
+    textarea {
+      resize: none;              /* Desactiva el control de cambio de tamaño manual */
+      overflow-y: hidden;        /* Evita barras de desplazamiento vertical */
+      min-height: 80px;          /* Altura mínima */
+      transition: height 0.2s ease; /* Suaviza el cambio de tamaño */
+    }
+  </style>
+</head>
+<body data-role="{{ user.role }}">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="brand">Portal de Prácticas TI</div>
+    <ul class="nav">
+      <li><a href="{% url 'portal_empresas' %}">Inicio</a></li>
+      {% if user.role == 'empresa' %}
+        <li><a href="{% url 'publicar_anuncio' %}">Publicar Anuncio</a></li>
+        <li><a href="{% url 'ver_postulaciones_empresa' %}">Ver Postulaciones</a></li>
+      {% endif %}
+      <li><a href="#funcionalidades">Capacitación</a></li>
+      <li><a href="{% url 'logout' %}">Cerrar Sesión</a></li>
+    </ul>
+  </header>
+
+  <section class="container">
+    <!-- Sidebar izquierda -->
+    <div class="sidebar">
+      {% for anuncio in anuncios %}
+  <div class="anuncio-item" data-id="{{ anuncio.id }}">
+          <h4>{{ anuncio.titulo }}</h4>
+          <small>{{ anuncio.ubicacion }} — {{ anuncio.get_modalidad_display }}</small><br>
+          <small>{{ anuncio.tipo_practica|default:"Práctica profesional" }}</small>
+        </div>
+      {% empty %}
+        <p>No tienes publicaciones aún.</p>
+      {% endfor %}
+    </div>
+
+    <!-- Panel derecho -->
+    <div class="detalle" id="detalle">
+      {% if user.role == 'capacitador' %}
+        <div style="background:#eef;color:#224;border:1px solid #bbf;padding:12px;border-radius:8px;">
+          Vista de solo lectura para capacitadores. No puedes editar ni eliminar publicaciones.
+        </div>
+      {% endif %}
+      <p>Selecciona una publicación para ver sus detalles.</p>
+    </div>
+  </section>
+
+  {% include 'portal/partials/_footer.html' %}
+
+  <script>
+  // bandera de rol a partir del DOM (evita incrustar bloques de plantilla en JS)
+  const IS_CAPACITADOR = (document.body.dataset.role === 'capacitador');
+  // delegación de eventos para cargar detalle sin inline handlers
+  document.addEventListener('click', (e) => {
+    const item = e.target.closest('.anuncio-item');
+    if (item && item.dataset.id) {
+      const id = item.dataset.id;
+      mostrarDetalle(id);
+    }
+  });
+  function mostrarDetalle(id) {
+    fetch(`/portal/editar_publicacion/${id}/`, {
+      headers: {"X-Requested-With": "XMLHttpRequest"}
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (!data.success) {
+        document.getElementById("detalle").innerHTML = data.html_form;
+        // si es capacitador, deshabilitar inputs
+        if (IS_CAPACITADOR) {
+          const container = document.getElementById("detalle");
+          container.querySelectorAll('input, textarea, select, button[type="submit"]').forEach(el => {
+            el.setAttribute('disabled', 'disabled');
+          });
+        }
+        // Ajusta el formulario para guardar sin salir
+        const form = document.querySelector("#detalle form");
+        form.onsubmit = function(e) {
+          // bloquear envío en capacitador (solo lectura)
+          if (IS_CAPACITADOR) {
+            e.preventDefault();
+            return false;
+          }
+          e.preventDefault();
+          fetch(form.action, {
+            method: "POST",
+            body: new FormData(form),
+            headers: {"X-Requested-With": "XMLHttpRequest"}
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              window.location.reload();
+            } else {
+              document.getElementById("detalle").innerHTML = data.html_form;
+            }
+          });
+        };
+      }
+    });
+  }
+
+document.addEventListener("input", function(e) {
+  if (e.target.tagName.toLowerCase() === "textarea") {
+    e.target.style.height = "auto";               // Reinicia la altura
+    e.target.style.height = (e.target.scrollHeight) + "px"; // Ajusta según contenido
+  }
+});
+
+
+window.addEventListener("load", () => {
+  document.querySelectorAll("textarea").forEach(t => {
+    t.style.height = "auto";
+    t.style.height = (t.scrollHeight) + "px";
+  });
+});
+
+  </script>
+
+</body>
+</html>

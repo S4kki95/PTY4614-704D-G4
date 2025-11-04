@@ -1,0 +1,200 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Prácticas disponibles</title>
+  <link rel="stylesheet" href="{% static 'portal/style2.css' %}">
+
+  <style>
+    .contenedor {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 20px;
+      padding: 30px;
+    }
+
+    .lista-practicas {
+      border-right: 2px solid #eee;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+
+    .practica-item {
+      background: #f5f7fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .practica-item:hover {
+      background: #e8f0ff;
+    }
+
+    .practica-item h3 {
+      color: #004aad;
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+
+    .detalle-practica {
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      min-height: 400px;
+    }
+
+    .detalle-practica h3 {
+      color: #004aad;
+      margin-bottom: 10px;
+    }
+
+    .detalle-practica p {
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      background: #004aad;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      background: #003b8a;
+    }
+
+    /* versión pequeña del botón */
+    .btn-primary.btn-sm {
+      padding: 6px 10px;
+      font-size: 13px;
+      border-radius: 6px;
+    }
+
+    /* botón solo ícono (alineado a la altura del input) */
+    .btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+    }
+
+    .btn-disabled {
+      background: #ccc;
+      color: #666;
+      padding: 10px 15px;
+      border-radius: 6px;
+      border: none;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="header">
+  <div class="brand">Portal de Prácticas TI</div>
+  <ul class="nav">
+    <li><a href="{% url 'portal_practicantes' %}">Inicio</a></li>
+    <li><a href="{% url 'mis_postulaciones' %}">Mis Postulaciones</a></li>
+    <li><a href="{% url 'perfil_postulante' %}">Perfil</a></li>
+    <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
+  </ul>
+</header>
+
+<section class="section">
+  <h2 style="text-align:center; margin-top:0;">Prácticas disponibles</h2>
+
+  <form method="get" action="" style="max-width:1200px;margin:0 auto 16px;display:flex;gap:8px;align-items:center;">
+    <input type="text" name="q" value="{{ q|default:'' }}" placeholder="Buscar por título, empresa, ubicación..." style="flex:1 1 auto;padding:12px 14px;border:1px solid #cbd6e2;border-radius:8px;">
+    <button type="submit" class="btn-primary btn-icon" style="flex:0 0 auto;" aria-label="Buscar" title="Buscar">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </button>
+  </form>
+
+  {% if messages %}
+    <div style="max-width:900px;margin:0 auto 16px;">
+      {% for message in messages %}
+        {% if 'from_login' not in message.tags %}
+          <div style="padding:10px;border-radius:6px;margin-bottom:8px; {% if message.tags == 'error' %} background:#fee;color:#900;border:1px solid #f99; {% elif message.tags == 'success' %} background:#eefcee;color:#065f46;border:1px solid #a7f3d0; {% else %} background:#eef;border:1px solid #bbf; {% endif %}">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if publicaciones %}
+  <div class="contenedor">
+    <div class="lista-practicas">
+      {% for pub in publicaciones %}
+      <div class="practica-item" onclick="mostrarDetalle({{ pub.id }})">
+        <h3>{{ pub.titulo }}</h3>
+        <p>{{ pub.empresa.company_name|default:pub.empresa.username }} — {{ pub.creado_en|date:"d-m-Y" }}</p>
+        <small>{{ pub.ubicacion }} — {{ pub.modalidad|title }}</small><br>
+        <small>{{ pub.tipo_practica|title }}</small>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div id="detallePractica" class="detalle-practica">
+      <p>Selecciona una práctica para ver los detalles.</p>
+    </div>
+  </div>
+  {% else %}
+    {% if q %}
+      <p>No se encontraron publicaciones para "{{ q }}".</p>
+    {% else %}
+      <p>No hay publicaciones disponibles por ahora.</p>
+    {% endif %}
+  {% endif %}
+</section>
+
+{% include 'portal/partials/_footer.html' %}
+
+<script>
+  const publicaciones = {{ publicaciones_json|safe }};
+  const postulaciones = {{ postulaciones|safe }};
+
+  function mostrarDetalle(id) {
+    const pub = publicaciones.find(p => p.id === id);
+    const container = document.getElementById("detallePractica");
+
+    if (!pub) return;
+
+    container.innerHTML = `
+      <h3>${pub.titulo}</h3>
+      <p><strong>Empresa:</strong> ${pub.empresa}</p>
+      <p><strong>Ubicación:</strong> ${pub.ubicacion}</p>
+      <p><strong>Modalidad:</strong> ${pub.modalidad}</p>
+      <p><strong>Tipo de práctica:</strong> ${pub.tipo_practica}</p>
+      <p><strong>Duración:</strong> ${pub.duracion_meses} meses</p>
+      <p><strong>Jornada:</strong> ${pub.jornada}</p>
+      <p><strong>Requisitos:</strong> ${pub.requisitos}</p>
+      <p><strong>Descripción:</strong> ${pub.descripcion}</p>
+      <p><strong>Cupos disponibles:</strong> ${pub.cupos}</p>
+      <p><strong>Fecha publicación:</strong> ${pub.creado_en}</p>
+      ${
+        postulaciones.includes(pub.id)
+        ? '<button class="btn-disabled">Ya postulado</button>'
+        : `<a href="/portal/publicaciones/postular/${pub.id}/" class="btn-primary">Postular</a>`
+      }
+    `;
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,150 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Analytics • Admin</title>
+  <link rel="stylesheet" href="{% static 'portal/style5.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+    .kpi{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px 10px;border-bottom:1px solid #e5e7eb;text-align:left}
+  </style>
+</head>
+<body>
+<header class="header">
+  <div class="brand">Panel Admin • Analytics</div>
+  <ul class="nav">
+    <li><a href="{% url 'index' %}">Inicio</a></li>
+    <li><a href="{% url 'admin_analytics' %}" class="active">Analytics</a></li>
+    <li><a href="{% url 'logout' %}">Salir</a></li>
+  </ul>
+</header>
+<section class="section">
+  <h2>Filtros</h2>
+  <form method="get" class="form-grid" style="grid-template-columns:repeat(5,1fr);gap:8px;align-items:end">
+    <div>
+      <label>Desde</label>
+      <input type="date" name="start" value="{{ filters.start }}" />
+    </div>
+    <div>
+      <label>Hasta</label>
+      <input type="date" name="end" value="{{ filters.end }}" />
+    </div>
+    <div>
+      <label>Institución</label>
+      <select name="institucion">
+        <option value="">Todas</option>
+        {% for i in instituciones %}
+          <option value="{{ i }}" {% if filters.institucion == i %}selected{% endif %}>{{ i }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Tipo práctica</label>
+      <select name="tipo_practica">
+        <option value="">Todas</option>
+        {% for t in tipos %}
+          <option value="{{ t }}" {% if filters.tipo == t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Estado</label>
+      <select name="estado">
+        <option value="">Todos</option>
+        <option value="pendiente" {% if filters.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+        <option value="aceptado" {% if filters.estado == 'aceptado' %}selected{% endif %}>Aceptado</option>
+        <option value="rechazado" {% if filters.estado == 'rechazado' %}selected{% endif %}>Rechazado</option>
+      </select>
+    </div>
+    <div style="grid-column:1/-1">
+      <button class="btn btn-primary" type="submit">Aplicar</button>
+    </div>
+  </form>
+
+  <div class="kpis">
+    <div class="kpi"><div>Total postulaciones</div><div style="font-size:28px;font-weight:700">{{ kpis.total_postulaciones }}</div></div>
+    <div class="kpi"><div>Aceptadas</div><div style="font-size:28px;font-weight:700;color:#16a34a">{{ kpis.total_aceptadas }}</div></div>
+    <div class="kpi"><div>Rechazadas</div><div style="font-size:28px;font-weight:700;color:#dc2626">{{ kpis.total_rechazadas }}</div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Cuentas creadas por institución</h3>
+      <canvas id="chartCuentas"></canvas>
+    </div>
+    <div class="card">
+      <h3>Postulaciones por institución</h3>
+      <canvas id="chartPosts"></canvas>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="card">
+      <h3>Rechazos por institución</h3>
+      <canvas id="chartRechazos"></canvas>
+    </div>
+    <div class="card">
+      <h3>Postulaciones por tipo de práctica</h3>
+      <canvas id="chartTipos"></canvas>
+    </div>
+  </div>
+
+  <h2 style="margin-top:24px">Logs recientes</h2>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>Fecha</th><th>Acción</th><th>Postulación</th><th>Estado</th><th>Institución</th><th>Anuncio</th></tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+          <tr>
+            <td>{{ log.creado_en|date:'d-m-Y H:i' }}</td>
+            <td>{{ log.get_accion_display }}</td>
+            <td>#{{ log.postulacion_id }}</td>
+            <td>{% if log.old_estado %}{{ log.old_estado }} → {% endif %}{{ log.new_estado }}</td>
+            <td>{{ log.institucion|default:'-' }}</td>
+            <td>{{ log.anuncio.titulo|default:'-' }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="muted">No hay registros para los filtros seleccionados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% include 'portal/partials/_footer.html' %}
+
+{# Safer JSON embedding that won't break JS parsing and avoids XSS #}
+{{ cuentas_por_inst|json_script:"cuentas-data" }}
+{{ posts_por_inst|json_script:"posts-data" }}
+{{ rechazos_por_inst|json_script:"rechazos-data" }}
+{{ por_tipo|json_script:"tipos-data" }}
+
+<script>
+const cuentas = JSON.parse(document.getElementById('cuentas-data').textContent || '[]');
+const posts = JSON.parse(document.getElementById('posts-data').textContent || '[]');
+const rechazos = JSON.parse(document.getElementById('rechazos-data').textContent || '[]');
+const tipos = JSON.parse(document.getElementById('tipos-data').textContent || '[]');
+
+function bar(ctxId, labels, data, title){
+  const ctx = document.getElementById(ctxId);
+  if (!ctx) return;
+  new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: title, data, backgroundColor: '#2563eb' }] },
+    options: { responsive:true, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
+  });
+}
+
+bar('chartCuentas', cuentas.map(x=>x.institucion||'N/D'), cuentas.map(x=>x.cantidad), 'Cuentas');
+bar('chartPosts', posts.map(x=>x.postulante__institucion||'N/D'), posts.map(x=>x.cantidad), 'Postulaciones');
+bar('chartRechazos', rechazos.map(x=>x.postulante__institucion||'N/D'), rechazos.map(x=>x.cantidad), 'Rechazos');
+bar('chartTipos', tipos.map(x=>x.anuncio__tipo_practica||'N/D'), tipos.map(x=>x.cantidad), 'Tipos');
+</script>
+</body>
+</html>
