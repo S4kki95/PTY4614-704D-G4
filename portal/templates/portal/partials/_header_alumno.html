@@ -1,0 +1,63 @@
+{% load static %}
+<!-- Header con menú hamburguesa para alumnos -->
+<header class="header">
+  <div class="brand">Portal de Prácticas TI</div>
+  
+  <!-- Botón hamburguesa para móvil -->
+  <button class="hamburger" id="hamburger" aria-label="Menú">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  
+  <div class="nav-wrapper" id="navWrapper">
+    <ul class="nav">
+      <li><a href="{% url 'portal_practicantes' %}">Inicio</a></li>
+      <li><a href="{% url 'listar_publicaciones' %}">Buscar Prácticas</a></li>
+      <li><a href="{% url 'mis_postulaciones' %}">Mis Postulaciones</a></li>
+      <li><a href="{% url 'mis_capacitaciones' %}">Mis Capacitaciones</a></li>
+      <li><a href="{% url 'perfil_postulante' %}">Perfil</a></li>
+      
+      {% if user.is_authenticated %}
+      <li><span class="user-info">Bienvenido: {{ user.email }}</span></li>
+      <li><a href="{% url 'logout' %}" class="btn-logout">Cerrar Sesión</a></li>
+      {% else %}
+      <li><a href="{% url 'login' %}">Login</a></li>
+      <li><a href="{% url 'registro' %}">Registro</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</header>
+
+<script>
+  // Menú hamburguesa
+  const hamburger = document.getElementById('hamburger');
+  const navWrapper = document.getElementById('navWrapper');
+
+  if (hamburger && navWrapper) {
+    hamburger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      hamburger.classList.toggle('active');
+      navWrapper.classList.toggle('active');
+    });
+
+    // Cerrar menú al hacer clic en un enlace
+    const navLinks = document.querySelectorAll('.nav a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        navWrapper.classList.remove('active');
+      });
+    });
+
+    // Cerrar menú al hacer clic fuera
+    document.addEventListener('click', (e) => {
+      if (navWrapper.classList.contains('active') && 
+          !navWrapper.contains(e.target) && 
+          !hamburger.contains(e.target)) {
+        hamburger.classList.remove('active');
+        navWrapper.classList.remove('active');
+      }
+    });
+  }
+</script>

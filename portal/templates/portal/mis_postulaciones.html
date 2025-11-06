@@ -3,76 +3,221 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mis Postulaciones</title>
-  <link rel="stylesheet" href="{% static 'portal/style2.css' %}">
+  <link rel="stylesheet" href="{% static 'portal/style2.css' %}?v=15">
   <style>
     .status-pendiente { color: orange; font-weight: bold; }
     .status-aceptado { color: green; font-weight: bold; }
     .status-rechazado { color: red; font-weight: bold; }
+    
+    /* Tabla para desktop */
+    .table-container {
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+    
     th, td {
       border-bottom: 1px solid #ddd;
       padding: 12px;
       text-align: left;
     }
+    
     th {
-      background-color: #f4f4f4;
+      background-color: #174a7e;
+      color: white;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background-color: #f5f7fa;
+    }
+
+    /* Cards para móvil */
+    .postulaciones-cards {
+      display: none;
+    }
+
+    .postulacion-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .postulacion-card h3 {
+      color: #174a7e;
+      margin: 0 0 15px 0;
+      font-size: 18px;
+      line-height: 1.4;
+    }
+
+    .card-info {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .card-row:last-child {
+      border-bottom: none;
+    }
+
+    .card-label {
+      font-weight: 600;
+      color: #5f7591;
+      font-size: 14px;
+    }
+
+    .card-value {
+      font-weight: 500;
+      color: #0f2c4d;
+      text-align: right;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .section {
+        padding: 0 15px;
+      }
+
+      .section h2 {
+        font-size: 24px;
+        margin-top: 20px;
+      }
+
+      /* Ocultar tabla en móvil */
+      .table-container {
+        display: none;
+      }
+
+      /* Mostrar cards en móvil */
+      .postulaciones-cards {
+        display: block;
+        margin-top: 20px;
+      }
+
+      .postulacion-card {
+        margin-bottom: 15px;
+      }
+
+      .postulacion-card h3 {
+        font-size: 16px;
+      }
+
+      .card-label,
+      .card-value {
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .postulacion-card {
+        padding: 15px;
+      }
+
+      .postulacion-card h3 {
+        font-size: 15px;
+      }
     }
   </style>
 </head>
 <body>
 
-<header class="header">
-  <div class="brand">Portal de Prácticas TI</div>
-  <ul class="nav">
-    <li><a href="{% url 'portal_practicantes' %}">Inicio</a></li>
-    <li><a href="{% url 'listar_publicaciones' %}">Buscar Prácticas</a></li>
-    <li><a href="{% url 'mis_postulaciones' %}" class="active">Mis Postulaciones</a></li>
-    <li><a href="{% url 'perfil_postulante' %}">Perfil</a></li>
-    <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
-  </ul>
-</header>
+{% include 'portal/partials/_header_alumno.html' %}
 
 <section class="section">
   <h2>Mis Postulaciones</h2>
 
   {% if postulaciones %}
-    <table>
-      <thead>
-        <tr>
-          <th>Título de la práctica</th>
-          <th>Empresa</th>
-          <th>Ubicación</th>
-          <th>Fecha de postulación</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for p in postulaciones %}
+    <!-- Vista tabla para desktop -->
+    <div class="table-container">
+      <table>
+        <thead>
           <tr>
-            <td>{{ p.anuncio.titulo }}</td>
-            <td>{{ p.anuncio.empresa.company_name }}</td>
-            <td>{{ p.anuncio.ubicacion }}</td>
-            <td>{{ p.fecha_postulacion }}</td>
-            <td>
-              {% if p.estado == "pendiente" %}
-                <span class="status-pendiente">Pendiente</span>
-              {% elif p.estado == "aceptado" %}
-                <span class="status-aceptado">Aceptado</span>
-              {% elif p.estado == "rechazado" %}
-                <span class="status-rechazado">Rechazado</span>
-              {% else %}
-                {{ p.estado }}
-              {% endif %}
-            </td>
+            <th>Título de la práctica</th>
+            <th>Empresa</th>
+            <th>Ubicación</th>
+            <th>Fecha de postulación</th>
+            <th>Estado</th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% for p in postulaciones %}
+            <tr>
+              <td>{{ p.anuncio.titulo }}</td>
+              <td>{{ p.anuncio.empresa.company_name }}</td>
+              <td>{{ p.anuncio.ubicacion }}</td>
+              <td>{{ p.fecha_postulacion|date:"d-m-Y" }}</td>
+              <td>
+                {% if p.estado == "pendiente" %}
+                  <span class="status-pendiente">Pendiente</span>
+                {% elif p.estado == "aceptado" %}
+                  <span class="status-aceptado">Aceptado</span>
+                {% elif p.estado == "rechazado" %}
+                  <span class="status-rechazado">Rechazado</span>
+                {% else %}
+                  {{ p.estado }}
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Vista cards para móvil -->
+    <div class="postulaciones-cards">
+      {% for p in postulaciones %}
+        <div class="postulacion-card">
+          <h3>{{ p.anuncio.titulo }}</h3>
+          <div class="card-info">
+            <div class="card-row">
+              <span class="card-label">Empresa:</span>
+              <span class="card-value">{{ p.anuncio.empresa.company_name }}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Ubicación:</span>
+              <span class="card-value">{{ p.anuncio.ubicacion }}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Fecha:</span>
+              <span class="card-value">{{ p.fecha_postulacion|date:"d-m-Y" }}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Estado:</span>
+              <span class="card-value">
+                {% if p.estado == "pendiente" %}
+                  <span class="status-pendiente">Pendiente</span>
+                {% elif p.estado == "aceptado" %}
+                  <span class="status-aceptado">Aceptado</span>
+                {% elif p.estado == "rechazado" %}
+                  <span class="status-rechazado">Rechazado</span>
+                {% else %}
+                  {{ p.estado }}
+                {% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
   {% else %}
     <p>No tienes postulaciones registradas aún.</p>
   {% endif %}

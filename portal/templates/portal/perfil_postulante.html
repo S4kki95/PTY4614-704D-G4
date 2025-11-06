@@ -3,27 +3,60 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Perfil Postulante</title>
-  <link rel="stylesheet" href="{% static 'portal/style4.css' %}">
+  <link rel="stylesheet" href="{% static 'portal/style4.css' %}?v=15">
   <style>
     .alert { padding:10px; border-radius:6px; margin-bottom:8px; border:1px solid transparent; }
     .alert-error { background:#fee; color:#900; border-color:#f99; }
     .alert-success { background:#eefcee; color:#065f46; border-color:#a7f3d0; }
     .alert-info { background:#eef; border-color:#bbf; }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .form-container {
+        padding: 20px 15px;
+        margin: 20px 10px;
+      }
+
+      .form-container h2 {
+        font-size: 24px;
+      }
+
+      .form-container input,
+      .form-container textarea,
+      .form-container select {
+        font-size: 16px; /* Prevenir zoom en iOS */
+      }
+
+      /* Botones CV responsive */
+      .cv-actions {
+        flex-direction: column !important;
+        gap: 8px !important;
+      }
+
+      .cv-actions a,
+      .cv-actions button {
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .form-container {
+        padding: 15px 10px;
+        margin: 10px 5px;
+      }
+
+      .form-container h2 {
+        font-size: 20px;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <header class="header">
-    <div class="brand">Portal de Prácticas TI - Postulante</div>
-    <ul class="nav">
-      <li><a href="{% url 'portal_practicantes' %}">Inicio</a></li>
-      <li><a href="{% url 'listar_publicaciones' %}">Buscar Prácticas</a></li>
-      <li><a href="{% url 'mis_postulaciones' %}">Mis Postulaciones</a></li>
-      <li><a href="{% url 'perfil_postulante' %}" class="active">Mi Perfil</a></li>
-      <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
-    </ul>
-  </header>
+  {% include 'portal/partials/_header_alumno.html' %}
 
   <section class="section">
     {% if messages %}
@@ -47,8 +80,8 @@
       </form>
 
       {% if form.instance.cv %}
-  <div style="margin-top:16px; display:flex; gap:10px; align-items:center;">
-    <strong>CV actual:</strong>
+  <div class="cv-actions" style="margin-top:16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    <strong style="width:100%; margin-bottom:4px;">CV actual:</strong>
 
     <!-- Ver en el navegador (si el visor puede abrirlo) -->
     <a href="{% url 'ver_cv_propio' %}" target="_blank" rel="noopener"
