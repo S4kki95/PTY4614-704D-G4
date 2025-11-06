@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.template.loader import render_to_string
 from django.core.serializers.json import DjangoJSONEncoder
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from supabase import create_client, Client
 from django.db.models import Q, Count
 
@@ -451,7 +452,19 @@ def listar_publicaciones(request):
             | Q(empresa__company_name__icontains=q)
             | Q(empresa__username__icontains=q)
         )
-    publicaciones = publicaciones_qs.order_by('-creado_en')
+    publicaciones_qs = publicaciones_qs.order_by('-creado_en')
+    
+    # Paginación: 10 publicaciones por página
+    paginator = Paginator(publicaciones_qs, 10)
+    page_number = request.GET.get('page', 1)
+    
+    try:
+        publicaciones_page = paginator.page(page_number)
+    except PageNotAnInteger:
+        publicaciones_page = paginator.page(1)
+    except EmptyPage:
+        publicaciones_page = paginator.page(paginator.num_pages)
+    
     postulaciones = list(
         Postulacion.objects.filter(postulante=perfil).values_list('anuncio_id', flat=True)
     )
@@ -472,11 +485,11 @@ def listar_publicaciones(request):
             "cupos": p.cupos,
             "creado_en": p.creado_en.strftime("%d-%m-%Y"),
         }
-        for p in publicaciones
+        for p in publicaciones_page
     ], cls=DjangoJSONEncoder)
 
     return render(request, "portal/publicaciones.html", {
-        "publicaciones": publicaciones,
+        "publicaciones": publicaciones_page,
         "publicaciones_json": publicaciones_json,
         "postulaciones": postulaciones,
         "q": q,

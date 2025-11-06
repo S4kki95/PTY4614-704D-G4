@@ -173,6 +173,55 @@
       display: block;
     }
 
+    /* Estilos de paginación */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin: 30px 0;
+      flex-wrap: wrap;
+    }
+
+    .pagination a,
+    .pagination span {
+      padding: 8px 12px;
+      border: 1px solid #cbd6e2;
+      border-radius: 6px;
+      text-decoration: none;
+      color: #174a7e;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .pagination a:hover {
+      background: #174a7e;
+      color: white;
+    }
+
+    .pagination .current {
+      background: #174a7e;
+      color: white;
+      border-color: #174a7e;
+    }
+
+    .pagination .disabled {
+      color: #94a3b8;
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .pagination .disabled:hover {
+      background: transparent;
+      color: #94a3b8;
+    }
+
+    .page-info {
+      color: #5f7591;
+      font-size: 14px;
+      margin: 0 10px;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .section {
@@ -209,6 +258,25 @@
       form[method="get"] input[type="text"] {
         font-size: 14px;
         padding: 10px 12px;
+      }
+
+      /* Paginación responsive */
+      .pagination {
+        gap: 5px;
+        margin: 20px 0;
+      }
+
+      .pagination a,
+      .pagination span {
+        padding: 6px 10px;
+        font-size: 14px;
+      }
+
+      .page-info {
+        width: 100%;
+        text-align: center;
+        margin-top: 10px;
+        font-size: 13px;
       }
     }
   </style>
@@ -260,6 +328,41 @@
       <p>Selecciona una práctica para ver los detalles.</p>
     </div>
   </div>
+
+  <!-- Paginación -->
+  {% if publicaciones.has_other_pages %}
+  <div class="pagination">
+    {% if publicaciones.has_previous %}
+      <a href="?page=1{% if q %}&q={{ q }}{% endif %}" title="Primera página">&laquo;&laquo;</a>
+      <a href="?page={{ publicaciones.previous_page_number }}{% if q %}&q={{ q }}{% endif %}" title="Página anterior">&laquo;</a>
+    {% else %}
+      <span class="disabled">&laquo;&laquo;</span>
+      <span class="disabled">&laquo;</span>
+    {% endif %}
+
+    {% for num in publicaciones.paginator.page_range %}
+      {% if publicaciones.number == num %}
+        <span class="current">{{ num }}</span>
+      {% elif num > publicaciones.number|add:'-3' and num < publicaciones.number|add:'3' %}
+        <a href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if publicaciones.has_next %}
+      <a href="?page={{ publicaciones.next_page_number }}{% if q %}&q={{ q }}{% endif %}" title="Página siguiente">&raquo;</a>
+      <a href="?page={{ publicaciones.paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}" title="Última página">&raquo;&raquo;</a>
+    {% else %}
+      <span class="disabled">&raquo;</span>
+      <span class="disabled">&raquo;&raquo;</span>
+    {% endif %}
+
+    <span class="page-info">
+      Página {{ publicaciones.number }} de {{ publicaciones.paginator.num_pages }} 
+      ({{ publicaciones.paginator.count }} publicación{{ publicaciones.paginator.count|pluralize:"es" }})
+    </span>
+  </div>
+  {% endif %}
+
   {% else %}
     {% if q %}
       <p>No se encontraron publicaciones para "{{ q }}".</p>
