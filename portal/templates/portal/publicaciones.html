@@ -328,41 +328,6 @@
       <p>Selecciona una práctica para ver los detalles.</p>
     </div>
   </div>
-
-  <!-- Paginación -->
-  {% if publicaciones.has_other_pages %}
-  <div class="pagination">
-    {% if publicaciones.has_previous %}
-      <a href="?page=1{% if q %}&q={{ q }}{% endif %}" title="Primera página">&laquo;&laquo;</a>
-      <a href="?page={{ publicaciones.previous_page_number }}{% if q %}&q={{ q }}{% endif %}" title="Página anterior">&laquo;</a>
-    {% else %}
-      <span class="disabled">&laquo;&laquo;</span>
-      <span class="disabled">&laquo;</span>
-    {% endif %}
-
-    {% for num in publicaciones.paginator.page_range %}
-      {% if publicaciones.number == num %}
-        <span class="current">{{ num }}</span>
-      {% elif num > publicaciones.number|add:'-3' and num < publicaciones.number|add:'3' %}
-        <a href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}">{{ num }}</a>
-      {% endif %}
-    {% endfor %}
-
-    {% if publicaciones.has_next %}
-      <a href="?page={{ publicaciones.next_page_number }}{% if q %}&q={{ q }}{% endif %}" title="Página siguiente">&raquo;</a>
-      <a href="?page={{ publicaciones.paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}" title="Última página">&raquo;&raquo;</a>
-    {% else %}
-      <span class="disabled">&raquo;</span>
-      <span class="disabled">&raquo;&raquo;</span>
-    {% endif %}
-
-    <span class="page-info">
-      Página {{ publicaciones.number }} de {{ publicaciones.paginator.num_pages }} 
-      ({{ publicaciones.paginator.count }} publicación{{ publicaciones.paginator.count|pluralize:"es" }})
-    </span>
-  </div>
-  {% endif %}
-
   {% else %}
     {% if q %}
       <p>No se encontraron publicaciones para "{{ q }}".</p>

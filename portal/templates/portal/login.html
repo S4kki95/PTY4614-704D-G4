@@ -3,19 +3,121 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Portal Prácticas TI</title>
   <link rel="stylesheet" href="{% static 'portal/style3.css' %}">
+  <style>
+    /* Estilos para el menú hamburguesa */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px;
+      z-index: 1001;
+    }
+
+    .hamburger span {
+      width: 25px;
+      height: 3px;
+      background-color: white;
+      margin: 3px 0;
+      transition: all 0.3s ease;
+      border-radius: 2px;
+    }
+
+    .hamburger.active span:nth-child(1) {
+      transform: rotate(45deg) translate(7px, 7px);
+    }
+
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(7px, -7px);
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        padding: 15px 20px;
+      }
+
+      .hamburger {
+        display: flex;
+      }
+
+      .nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 280px;
+        height: 100vh;
+        background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        padding: 80px 0 20px;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+        transition: right 0.3s ease;
+        z-index: 1000;
+        gap: 0;
+      }
+
+      .nav.active {
+        right: 0;
+      }
+
+      .nav li {
+        margin: 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+
+      .nav li a {
+        display: block;
+        padding: 18px 25px;
+        font-size: 16px;
+        transition: all 0.2s;
+      }
+
+      .nav li a:hover {
+        background: rgba(255,255,255,0.1);
+        padding-left: 35px;
+      }
+
+      .section {
+        padding: 20px 15px;
+      }
+
+      .login-container {
+        padding: 20px;
+        margin: 0 auto;
+        max-width: 100%;
+      }
+
+      .login-container h2 {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+      }
+
+      .login-container input[type="text"],
+      .login-container input[type="email"],
+      .login-container input[type="password"] {
+        font-size: 16px;
+      }
+
+      .login-container button {
+        width: 100%;
+        padding: 14px;
+        font-size: 16px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Header igual que en index -->
-  <header class="header">
-    <div class="brand">Portal de Prácticas TI</div>
-    <ul class="nav">
-      <li><a href="{% url 'index' %}">Inicio</a></li>
-      <li><a href="{% url 'registro' %}">Registro</a></li>
-    </ul>
-  </header>
+  {% include 'portal/partials/_header_publico.html' %}
 
   <!-- Contenedor de login -->
   <section class="section">

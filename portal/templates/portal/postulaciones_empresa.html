@@ -3,8 +3,9 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Postulaciones Recibidas</title>
-  <link rel="stylesheet" href="{% static 'portal/style2.css' %}">
+  <link rel="stylesheet" href="{% static 'portal/style2.css' %}?v=16">
   <style>
     .status-pendiente { color: orange; font-weight: bold; }
     .status-aceptado { color: green; font-weight: bold; }
@@ -36,35 +37,28 @@
 </head>
 <body data-role="{{ user.role }}">
 
-<header class="header">
-  <div class="brand">Portal de Prácticas TI – Empresa</div>
-  <ul class="nav">
-    <li><a href="{% url 'portal_empresas' %}">Inicio</a></li>
-    <li><a href="{% url 'publicar_anuncio' %}">Publicar Anuncio</a></li> 
-    <li><a href="{% url 'gestionar_publicaciones' %}">Gestionar Publicaciones</a></li>
-    <li><a href="{% url 'perfil_empresa' %}">Perfil</a></li>
-    <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
-  </ul>
-</header>
+{% include 'portal/partials/_header_empresa.html' %}
 
 <section class="section">
   <h2>Postulaciones Recibidas</h2>
 
   {% if postulaciones %}
     <style>
-  .container { display:flex; gap:24px; height: calc(100vh - 120px); }
-  .sidebar { width:360px; border-right:1px solid #ccc; overflow-y:auto; background:#f8f9fa; padding:10px; }
+      /* Layout principal */
+      .container { display:flex; gap:24px; height: calc(100vh - 120px); }
+      .sidebar { width:360px; border-right:1px solid #ccc; overflow-y:auto; background:#f8f9fa; padding:10px; }
       .postulante-item { background:#fff; border-radius:8px; padding:12px; margin-bottom:10px; box-shadow:0 1px 3px rgba(0,0,0,0.1); cursor:pointer; transition: background 0.2s; }
       .postulante-item:hover { background:#e7f0ff; }
+      .postulante-item.active { background:#dbeafe; border-left: 4px solid #2563eb; }
       .postulante-item h4 { margin:0; color:#004aad; }
       .postulante-item small { color: gray; }
       .detalle { flex-grow:1; padding:30px; overflow-y:auto; display:flex; justify-content:center; align-items:flex-start; }
       .detalle > * { width:100%; max-width:900px; margin:0 auto; }
-  .detail-card { background:#fff; padding:20px; border-radius:10px; box-shadow:0 1px 3px rgba(0,0,0,0.08); width:760px; max-width:760px; }
+      .detail-card { background:#fff; padding:20px; border-radius:10px; box-shadow:0 1px 3px rgba(0,0,0,0.08); width:760px; max-width:760px; }
       .info-grid { display:grid; grid-template-columns: 160px 1fr; column-gap:12px; row-gap:10px; }
       .label { color:#64748b; font-weight:600; }
-  .value { color:#0f172a; word-break: break-word; overflow-wrap: anywhere; }
-      .actions { margin-top:16px; display:flex; gap:10px; }
+      .value { color:#0f172a; word-break: break-word; overflow-wrap: anywhere; }
+      .actions { margin-top:16px; display:flex; gap:10px; flex-wrap: wrap; }
       .btn-s { padding:8px 12px; border-radius:6px; color:#fff; text-decoration:none; display:inline-block; }
       .btn-acc { background:#16a34a; }
       .btn-rej { background:#dc2626; }
@@ -73,12 +67,247 @@
       .status-aceptado { color: green; font-weight:700; }
       .status-rechazado { color: red; font-weight:700; }
 
-      /* Responsive fallback */
-      @media (max-width: 1024px) {
-        .container { flex-direction: column; height: auto; }
-        .sidebar { width: 100%; border-right: none; }
-        .detalle > * { max-width: 100%; }
-        .detail-card { width: 100%; max-width: 100%; }
+      /* Modal bottom sheet para móvil */
+      .modal-overlay-custom {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+
+      .modal-overlay-custom.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .modal-bottom {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+        max-height: 80vh;
+        z-index: 1000;
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .modal-bottom.active {
+        transform: translateY(0);
+      }
+
+      .modal-header-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e5e7eb;
+        flex-shrink: 0;
+        background: white;
+        border-radius: 20px 20px 0 0;
+      }
+
+      .modal-header-custom h3 {
+        margin: 0;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #1e293b;
+      }
+
+      .modal-close-custom {
+        background: #f1f5f9;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        font-size: 24px;
+        line-height: 1;
+        color: #64748b;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.2s;
+      }
+
+      .modal-close-custom:hover {
+        background: #e2e8f0;
+        color: #334155;
+      }
+
+      #modalContentPostulacion {
+        overflow-y: auto;
+        padding: 20px;
+        flex: 1;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Estilos para el contenido del modal */
+      #modalContentPostulacion .detail-card {
+        background: transparent;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+      }
+
+      #modalContentPostulacion .info-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      #modalContentPostulacion .info-row {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f1f5f9;
+      }
+
+      #modalContentPostulacion .info-row:last-child {
+        border-bottom: none;
+      }
+
+      #modalContentPostulacion .label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      #modalContentPostulacion .value {
+        font-size: 15px;
+        color: #1e293b;
+        font-weight: 500;
+      }
+
+      #modalContentPostulacion .actions {
+        margin-top: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding-top: 20px;
+        border-top: 2px solid #f1f5f9;
+      }
+
+      #modalContentPostulacion .btn-s {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        text-align: center;
+        transition: all 0.2s;
+      }
+
+      #modalContentPostulacion .btn-cv:hover {
+        background: #1d4ed8;
+      }
+
+      #modalContentPostulacion .btn-acc:hover {
+        background: #15803d;
+      }
+
+      #modalContentPostulacion .btn-rej:hover {
+        background: #b91c1c;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .container { 
+          flex-direction: column; 
+          height: auto; 
+        }
+        
+        .sidebar { 
+          width: 100%; 
+          border-right: none; 
+          max-height: none;
+          padding: 5px;
+        }
+
+        .postulante-item {
+          padding: 15px;
+        }
+
+        .postulante-item h4 {
+          font-size: 16px;
+        }
+
+        .postulante-item small {
+          font-size: 13px;
+        }
+        
+        /* Ocultar panel de detalle en móvil */
+        .detalle { 
+          display: none !important;
+        }
+
+        /* Mostrar modal en móvil */
+        .detail-card {
+          width: 100%;
+          max-width: 100%;
+          padding: 15px;
+        }
+
+        .info-grid {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+
+        .label {
+          font-size: 13px;
+          margin-bottom: 2px;
+        }
+
+        .value {
+          font-size: 14px;
+          margin-bottom: 8px;
+        }
+
+        .actions {
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .btn-s {
+          width: 100%;
+          text-align: center;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .postulante-item {
+          padding: 12px;
+        }
+
+        .postulante-item h4 {
+          font-size: 15px;
+        }
+
+        .detail-card {
+          padding: 10px;
+        }
+
+        .label {
+          font-size: 12px;
+        }
+
+        .value {
+          font-size: 13px;
+        }
       }
     </style>
 
@@ -115,51 +344,162 @@
 
     <script>
       const IS_EMPRESA = (document.body.dataset.role === 'empresa');
-      const detail = document.getElementById('detalle');
+
       document.addEventListener('click', (e) => {
         const card = e.target.closest('.postulante-item');
         if (card && card.dataset.id) {
+          console.log('Click detectado en:', card);
           mostrarDetalle(card);
         }
       });
+
       function mostrarDetalle(el) {
+        const isMobile = window.innerWidth <= 768;
+        console.log('mostrarDetalle llamado, isMobile:', isMobile);
+        
         document.querySelectorAll('.postulante-item.active').forEach(n => n.classList.remove('active'));
         el.classList.add('active');
+        
         const d = el.dataset;
         const estadoClass = d.estado === 'pendiente' ? 'status-pendiente' : (d.estado === 'aceptado' ? 'status-aceptado' : 'status-rechazado');
-  let acciones = '';
-  if (d.cv) {
-    acciones += '<a class="btn-s btn-cv" href="' + d.viewCvUrl + '" target="_blank" rel="noopener">Ver CV</a>';
-    acciones += ' <a class="btn-s" style="background:#475569" href="' + d.viewCvUrl + '?download=1" target="_blank" rel="noopener">Descargar</a>';
-  }
+        
+        let acciones = '';
+        if (d.cv) {
+          acciones += '<a class="btn-s btn-cv" href="' + d.viewCvUrl + '" target="_blank" rel="noopener">Ver CV</a>';
+          acciones += ' <a class="btn-s" style="background:#475569" href="' + d.viewCvUrl + '?download=1" target="_blank" rel="noopener">Descargar</a>';
+        }
         else acciones += '<span style="color:#6b7280;">Sin CV</span>';
+        
         if (IS_EMPRESA) {
           if (d.estado !== 'aceptado') acciones += ' <a class="btn-s btn-acc" href="' + d.acceptUrl + '">Aceptar</a>';
           if (d.estado !== 'rechazado') acciones += ' <a class="btn-s btn-rej" href="' + d.rejectUrl + '">Rechazar</a>';
         }
+        
         const html =
           '<div class="detail-card">' +
             '<div class="info-grid">' +
-              '<div class="label">Postulante:</div><div class="value">' + d.nombre + ' ' + d.apellido + '</div>' +
-              '<div class="label">RUT:</div><div class="value">' + (d.rut || '-') + '</div>' +
-              '<div class="label">Teléfono:</div><div class="value">' + (d.telefono || '-') + '</div>' +
-              '<div class="label">Correo:</div><div class="value">' + d.correo + '</div>' +
-              '<div class="label">Institución:</div><div class="value">' + (d.institucion || '-') + '</div>' +
-              '<div class="label">Anuncio:</div><div class="value">' + d.anuncio + '</div>' +
-              '<div class="label">Fecha:</div><div class="value">' + d.fecha + '</div>' +
-              '<div class="label">Estado:</div><div class="value ' + estadoClass + '">' + d.estado.charAt(0).toUpperCase() + d.estado.slice(1) + '</div>' +
+              '<div class="info-row">' +
+                '<div class="label">Postulante</div>' +
+                '<div class="value">' + d.nombre + ' ' + d.apellido + '</div>' +
+              '</div>' +
+              '<div class="info-row">' +
+                '<div class="label">RUT</div>' +
+                '<div class="value">' + (d.rut || '-') + '</div>' +
+              '</div>' +
+              '<div class="info-row">' +
+                '<div class="label">Teléfono</div>' +
+                '<div class="value">' + (d.telefono || '-') + '</div>' +
+              '</div>' +
+              '<div class="info-row">' +
+                '<div class="label">Correo</div>' +
+                '<div class="value">' + d.correo + '</div>' +
+              '</div>' +
+              '<div class="info-row">' +
+                '<div class="label">Institución</div>' +
+                '<div class="value">' + (d.institucion || '-') + '</div>' +
+              '</div>' +
+              '<div class="info-row">' +
+                '<div class="label">Anuncio</div>' +
+                '<div class="value">' + d.anuncio + '</div>' +
+              '</div>' +
+              '<div class="info-row">' +
+                '<div class="label">Fecha de Postulación</div>' +
+                '<div class="value">' + d.fecha + '</div>' +
+              '</div>' +
+              '<div class="info-row">' +
+                '<div class="label">Estado</div>' +
+                '<div class="value ' + estadoClass + '">' + d.estado.charAt(0).toUpperCase() + d.estado.slice(1) + '</div>' +
+              '</div>' +
             '</div>' +
             '<div class="actions">' + acciones + '</div>' +
-          '</div>';        
-        detail.innerHTML = html;
+          '</div>';
+        
+        if (isMobile) {
+          // Obtener elementos del modal cada vez (porque están fuera del bloque if)
+          const modalContent = document.getElementById('modalContentPostulacion');
+          const modalOverlay = document.getElementById('modalOverlay');
+          const modalBottom = document.getElementById('modalBottom');
+          
+          console.log('Elementos del modal:', {
+            modalContent: modalContent,
+            modalOverlay: modalOverlay,
+            modalBottom: modalBottom
+          });
+          
+          // Mostrar modal en móvil
+          if (modalContent) {
+            modalContent.innerHTML = html;
+            console.log('HTML insertado en modal');
+          } else {
+            console.error('modalContent es null!');
+          }
+          
+          if (modalOverlay) {
+            modalOverlay.classList.add('active');
+            console.log('Overlay activado');
+          }
+          
+          if (modalBottom) {
+            modalBottom.classList.add('active');
+            console.log('Modal bottom activado');
+          }
+        } else {
+          // Mostrar en el panel lateral en desktop
+          const detail = document.getElementById('detalle');
+          console.log('Mostrando en panel desktop');
+          if (detail) {
+            detail.innerHTML = html;
+          }
+        }
       }
+      
       const first = document.querySelector('.postulante-item');
-      if (first) mostrarDetalle(first);
+      if (first && window.innerWidth > 768) {
+        console.log('Cargando primera postulación en desktop');
+        mostrarDetalle(first);
+      }
     </script>
   {% else %}
     <p>No hay postulaciones a tus prácticas aún.</p>
   {% endif %}
 </section>
+
+<!-- Overlay para modal móvil -->
+<div class="modal-overlay-custom" id="modalOverlay"></div>
+
+<!-- Modal bottom sheet para móvil -->
+<div class="modal-bottom" id="modalBottom">
+  <div class="modal-header-custom">
+    <h3>Detalles de la postulación</h3>
+    <button class="modal-close-custom" aria-label="Cerrar">×</button>
+  </div>
+  <div id="modalContentPostulacion"></div>
+</div>
+
+<script>
+  // Script para cerrar modal (disponible globalmente)
+  function cerrarModalPostulacion() {
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalBottom = document.getElementById('modalBottom');
+    if (modalOverlay && modalBottom) {
+      modalOverlay.classList.remove('active');
+      modalBottom.classList.remove('active');
+    }
+  }
+
+  // Event listener para cerrar con overlay
+  document.addEventListener('DOMContentLoaded', function() {
+    const modalOverlay = document.getElementById('modalOverlay');
+    if (modalOverlay) {
+      modalOverlay.addEventListener('click', cerrarModalPostulacion);
+    }
+    
+    const closeBtn = document.querySelector('.modal-close-custom');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', cerrarModalPostulacion);
+    }
+  });
+</script>
 
 {% include 'portal/partials/_footer.html' %}
 

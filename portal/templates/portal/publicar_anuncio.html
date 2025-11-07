@@ -3,22 +3,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Publicar práctica - Portal Empresas</title>
-  <link rel="stylesheet" href="{% static 'portal/style5.css' %}">
+  <link rel="stylesheet" href="{% static 'portal/style5.css' %}?v=16">
 </head>
 <body>
-  <header class="header">
-    <div class="brand">Portal de Prácticas TI</div>
-    <ul class="nav">
-      <li><a href="{% url 'portal_empresas' %}">Inicio</a></li>
-      <li><a href="{% url 'publicar_anuncio' %}" class="active">Publicar Anuncio</a></li>
-      <li><a href="{% url 'ver_postulaciones_empresa' %}">Ver Postulaciones</a></li>
-      <li><a href="{% url 'gestionar_publicaciones' %}">Gestionar Publicaciones</a></li>
-      <li><a href="#funcionalidades">Capacitación</a></li>
-      <li><a href="{% url 'perfil_empresa' %}">Perfil</a></li>
-      <li><a href="{% url 'logout' %}">Cerrar Sesión</a></li>
-    </ul>
-  </header>
+  {% include 'portal/partials/_header_empresa.html' %}
 
   <section class="section">
 

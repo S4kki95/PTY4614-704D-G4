@@ -3,36 +3,227 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Capacitaciones</title>
-  <link rel="stylesheet" href="{% static 'portal/style2.css' %}">
+  <link rel="stylesheet" href="{% static 'portal/style5.css' %}?v=18">
   <style>
-    .grid { display:grid; grid-template-columns: 380px 1fr; gap:24px; }
-    .list { border-right:1px solid #e5e7eb; padding-right:16px; max-height: calc(100vh - 160px); overflow:auto; }
-    .item { background:#fff; border-radius:8px; padding:12px; margin-bottom:10px; box-shadow:0 1px 3px rgba(0,0,0,.06); cursor:pointer; }
-    .item.active{ outline:2px solid #2563eb }
-    .panel { background:#fff; border-radius:10px; box-shadow:0 1px 3px rgba(0,0,0,.08); padding:20px; }
-  .info { display:grid; grid-template-columns: 160px 1fr; gap:10px 12px; }
-  .label{ color:#64748b; font-weight:600; font-size:14px }
-  .value{ color:#0f172a; font-size:14px }
-    .block{ margin-top:16px }
-    .actions a, .actions button { margin-right:8px }
-    .muted{ color:#6b7280 }
-    .badge{ padding:2px 8px; border-radius:12px; font-size:12px; }
-    .badge-acc{ background:#dcfce7; color:#166534 }
-    .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px }
-    .form-row label{ font-weight:600; color:#334155; font-size:14px }
-    .form-row input, .form-row select{ width:100% }
+    * {
+      box-sizing: border-box;
+    }
+
+    body, html {
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+
+    .grid { 
+      display: grid; 
+      grid-template-columns: 380px 1fr; 
+      gap: 24px; 
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .list { 
+      border-right: 1px solid #e5e7eb; 
+      padding-right: 16px; 
+      max-height: calc(100vh - 160px); 
+      overflow: auto; 
+    }
+
+    .item { 
+      background: #fff; 
+      border-radius: 8px; 
+      padding: 12px; 
+      margin-bottom: 10px; 
+      box-shadow: 0 1px 3px rgba(0,0,0,.06); 
+      cursor: pointer; 
+      transition: all 0.2s;
+    }
+
+    .item:hover {
+      background: #f8f9fa;
+    }
+
+    .item.active { 
+      outline: 2px solid #2563eb;
+    }
+
+    .panel { 
+      background: #fff; 
+      border-radius: 10px; 
+      box-shadow: 0 1px 3px rgba(0,0,0,.08); 
+      padding: 20px; 
+      max-height: calc(100vh - 160px);
+      overflow-y: auto;
+    }
+
+    .info { 
+      display: grid; 
+      grid-template-columns: 160px 1fr; 
+      gap: 10px 12px; 
+    }
+
+    .label { 
+      color: #64748b; 
+      font-weight: 600; 
+      font-size: 14px; 
+    }
+
+    .value { 
+      color: #0f172a; 
+      font-size: 14px; 
+    }
+
+    .block { 
+      margin-top: 16px; 
+    }
+
+    .actions a, .actions button { 
+      margin-right: 8px; 
+    }
+
+    .muted { 
+      color: #6b7280; 
+    }
+
+    .badge { 
+      padding: 2px 8px; 
+      border-radius: 12px; 
+      font-size: 12px; 
+    }
+
+    .badge-acc { 
+      background: #dcfce7; 
+      color: #166534; 
+    }
+
+    .form-row { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 12px; 
+    }
+
+    .form-row label { 
+      font-weight: 600; 
+      color: #334155; 
+      font-size: 14px; 
+    }
+
+    .form-row input, 
+    .form-row select { 
+      width: 100%; 
+    }
+
+    /* Modal styles */
+    .modal-overlay-custom {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal-overlay-custom.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-bottom {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+      max-height: 85vh;
+      z-index: 1000;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-bottom.active {
+      transform: translateY(0);
+    }
+
+    .modal-header-custom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e5e7eb;
+      flex-shrink: 0;
+    }
+
+    .modal-header-custom h3 {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .modal-close-custom {
+      background: #f1f5f9;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 24px;
+      line-height: 1;
+      color: #64748b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .modal-close-custom:hover {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    #modalContentCapacitacion {
+      overflow-y: auto;
+      padding: 20px;
+      flex: 1;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+      .list {
+        border-right: none;
+        padding-right: 0;
+        max-height: none;
+      }
+
+      .panel {
+        display: none !important;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
-<header class="header">
-  <div class="brand">Portal de Prácticas TI – Capacitaciones</div>
-  <ul class="nav">
-    <li><a href="{% url 'portal_empresas' %}">Inicio</a></li>
-    <li><a href="{% url 'capacitaciones' %}">Capacitaciones</a></li>
-    <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
-  </ul>
-</header>
+
+{% include 'portal/partials/_header_empresa.html' %}
 <section class="section">
   <h2>Postulantes aceptados</h2>
   {% if messages %}
@@ -70,9 +261,27 @@
   <p class="muted">No hay postulaciones aceptadas aún.</p>
   {% endif %}
 </section>
+
+<!-- Overlay para modal móvil -->
+<div class="modal-overlay-custom" id="modalOverlay"></div>
+
+<!-- Modal bottom sheet para móvil -->
+<div class="modal-bottom" id="modalBottom">
+  <div class="modal-header-custom">
+    <h3>Detalles del Postulante</h3>
+    <button class="modal-close-custom" aria-label="Cerrar">×</button>
+  </div>
+  <div id="modalContentCapacitacion"></div>
+</div>
+
 {% include 'portal/partials/_footer.html' %}
 
 <script>
+// Detectar si es móvil
+function isMobile() {
+  return window.innerWidth <= 768;
+}
+
 const panel = document.getElementById('panel');
 // Fichas existentes agrupadas por postulacion_id (inyectadas desde la vista)
 const FICHAS = JSON.parse('{{ fichas_por_postulante_json|escapejs }}');
@@ -80,11 +289,381 @@ const FICHAS = JSON.parse('{{ fichas_por_postulante_json|escapejs }}');
 document.addEventListener('click', (e) => {
   const card = e.target.closest('.item');
   if (!card || !card.dataset.id) return;
+  
+  const d = card.dataset;
+  CURRENT_POSTULACION_ID = d.id;
+  
+  // Si es móvil, mostrar modal
+  if (isMobile()) {
+    mostrarDetalleMovil(card);
+    return;
+  }
+  
+  // Desktop: comportamiento original
   document.querySelectorAll('.item.active').forEach(n=>n.classList.remove('active'));
   card.classList.add('active');
+  
+  // usar el id de la postulacion como clave
+  const fichas = FICHAS[d.id] || [];
+  const listaFichas = fichas.map(f => `
+      <div class="item" data-ficha-id="${f.id}" style="display:flex; justify-content:space-between; align-items:center; padding:10px; border:1px solid #e5e7eb; border-radius:8px; margin-bottom:8px">
+        <div>
+          <div><strong>${f.nombre}</strong> <span class="muted">(${f.tipo})</span></div>
+          <div class="muted">${f.inicio} → ${f.termino}</div>
+          <div class="muted">Estado: ${f.estado}</div>
+        </div>
+        <div>
+          <button class="btn btn-secondary" onclick="seleccionarFicha(${f.id})">Evaluar</button>
+        </div>
+      </div>
+  `).join('');
+
+  panel.innerHTML = `
+    <div class="info">
+      <div class="label">Postulante:</div><div class="value">${d.postulante}</div>
+      <div class="label">RUT:</div><div class="value">${d.rut}</div>
+      <div class="label">Correo:</div><div class="value">${d.correo}</div>
+      <div class="label">Teléfono:</div><div class="value">${d.telefono}</div>
+      <div class="label">Anuncio:</div><div class="value">${d.anuncio}</div>
+      <div class="label">Fecha postulación:</div><div class="value">${d.fecha}</div>
+    </div>
+
+    <div class="block">
+      <h3>Agendar capacitación</h3>
+      <div id="panel-messages" style="margin-bottom:8px;"></div>
+  <form id="agendar-form" method="post" action="${d.agendarUrl}" data-postulacion-id="${d.id}">
+        ${csrfToken()}
+        <div class="form-row">
+          <div>
+            <label>Nombre</label>
+            <input name="nombre_capacitacion" class="form-control" placeholder="Ej: Onboarding" required />
+          </div>
+          <div>
+            <label>Tipo</label>
+            <input name="tipo_capacitacion" class="form-control" placeholder="Ej: Técnica" required />
+          </div>
+        </div>
+        <div class="form-row" style="margin-top:10px">
+          <div>
+            <label>Fecha inicio</label>
+            <input type="date" name="fecha_inicio" class="form-control" required />
+          </div>
+          <div>
+            <label>Fecha término</label>
+            <input type="date" name="fecha_termino" class="form-control" required />
+          </div>
+        </div>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn btn-primary" type="submit">Agendar</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="block">
+      <h3>Capacitaciones agendadas</h3>
+      <div id="lista-fichas">${listaFichas || '<p class="muted">Aún no hay capacitaciones agendadas.</p>'}</div>
+    </div>
+
+    <div id="evaluacion-block" class="block" style="display:none">
+      <h3>Registrar evaluación</h3>
+      <div id="eval-messages" style="margin-bottom:8px;"></div>
+      <form id="evaluacion-form" method="post" action="">
+        ${csrfToken()}
+        <div class="form-row">
+          <div>
+            <label>Fecha evaluación</label>
+            <input type="date" name="fecha_evaluacion" class="form-control" required />
+          </div>
+          <div>
+            <label>Tipo</label>
+            <input name="tipo_evaluacion" class="form-control" placeholder="Ej: Prueba" required />
+          </div>
+        </div>
+        <div class="form-row" style="margin-top:10px">
+          <div>
+            <label>Nota final (1.0 - 7.0)</label>
+            <input type="number" step="0.01" min="1" max="7" name="nota_final" class="form-control" required />
+          </div>
+        </div>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn btn-secondary" type="submit">Guardar evaluación</button>
+        </div>
+        <p class="muted">Estás evaluando la capacitación seleccionada.</p>
+      </form>
+    </div>
+  `;
+  enhanceDateConstraints();
+  hookAjaxSchedule();
+  hookAjaxEvaluate();
+});
+
+function mostrarDetalleMovil(card) {
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalBottom = document.getElementById('modalBottom');
+  const modalContent = document.getElementById('modalContentCapacitacion');
+  const closeBtn = modalBottom.querySelector('.modal-close-custom');
+  
   const d = card.dataset;
-  // persistir id de la postulacion para otras acciones (evaluación)
+  const fichas = FICHAS[d.id] || [];
+  const listaFichas = fichas.map(f => `
+      <div class="item" data-ficha-id="${f.id}" style="display:flex; justify-content:space-between; align-items:center; padding:10px; border:1px solid #e5e7eb; border-radius:8px; margin-bottom:8px">
+        <div>
+          <div><strong>${f.nombre}</strong> <span class="muted">(${f.tipo})</span></div>
+          <div class="muted">${f.inicio} → ${f.termino}</div>
+          <div class="muted">Estado: ${f.estado}</div>
+        </div>
+        <div>
+          <button class="btn btn-secondary" onclick="seleccionarFicha(${f.id})">Evaluar</button>
+        </div>
+      </div>
+  `).join('');
+  
+  // Construir contenido del modal
+  modalContent.innerHTML = `
+    <div class="info" style="display:grid; grid-template-columns: 1fr; gap:12px; margin-bottom:20px;">
+      <div><strong style="color:#64748b;">Postulante:</strong> ${d.postulante}</div>
+      <div><strong style="color:#64748b;">RUT:</strong> ${d.rut}</div>
+      <div><strong style="color:#64748b;">Correo:</strong> ${d.correo}</div>
+      <div><strong style="color:#64748b;">Teléfono:</strong> ${d.telefono}</div>
+      <div><strong style="color:#64748b;">Anuncio:</strong> ${d.anuncio}</div>
+      <div><strong style="color:#64748b;">Fecha postulación:</strong> ${d.fecha}</div>
+    </div>
+
+    <div class="block">
+      <h3>Agendar capacitación</h3>
+      <div id="panel-messages" style="margin-bottom:8px;"></div>
+      <form id="agendar-form" method="post" action="${d.agendarUrl}" data-postulacion-id="${d.id}">
+        ${csrfToken()}
+        <div class="form-row" style="display:grid; grid-template-columns: 1fr; gap:12px;">
+          <div>
+            <label>Nombre</label>
+            <input name="nombre_capacitacion" class="form-control" placeholder="Ej: Onboarding" required />
+          </div>
+          <div>
+            <label>Tipo</label>
+            <input name="tipo_capacitacion" class="form-control" placeholder="Ej: Técnica" required />
+          </div>
+        </div>
+        <div class="form-row" style="margin-top:10px; display:grid; grid-template-columns: 1fr; gap:12px;">
+          <div>
+            <label>Fecha inicio</label>
+            <input type="date" name="fecha_inicio" class="form-control" required />
+          </div>
+          <div>
+            <label>Fecha término</label>
+            <input type="date" name="fecha_termino" class="form-control" required />
+          </div>
+        </div>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn btn-primary" type="submit" style="width:100%;">Agendar</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="block">
+      <h3>Capacitaciones agendadas</h3>
+      <div id="lista-fichas">${listaFichas || '<p class="muted">Aún no hay capacitaciones agendadas.</p>'}</div>
+    </div>
+
+    <div id="evaluacion-block" class="block" style="display:none">
+      <h3>Registrar evaluación</h3>
+      <div id="eval-messages" style="margin-bottom:8px;"></div>
+      <form id="evaluacion-form" method="post" action="">
+        ${csrfToken()}
+        <div class="form-row" style="display:grid; grid-template-columns: 1fr; gap:12px;">
+          <div>
+            <label>Fecha evaluación</label>
+            <input type="date" name="fecha_evaluacion" class="form-control" required />
+          </div>
+          <div>
+            <label>Tipo</label>
+            <input name="tipo_evaluacion" class="form-control" placeholder="Ej: Prueba" required />
+          </div>
+        </div>
+        <div class="form-row" style="margin-top:10px; display:grid; grid-template-columns: 1fr; gap:12px;">
+          <div>
+            <label>Nota final (1.0 - 7.0)</label>
+            <input type="number" step="0.01" min="1" max="7" name="nota_final" class="form-control" required />
+          </div>
+        </div>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn btn-secondary" type="submit" style="width:100%;">Guardar evaluación</button>
+        </div>
+        <p class="muted">Estás evaluando la capacitación seleccionada.</p>
+      </form>
+    </div>
+  `;
+  
+  // Mostrar modal
+  modalOverlay.classList.add('active');
+  modalBottom.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  
+  // Setup forms
+  enhanceDateConstraintsModal();
+  hookAjaxScheduleModal();
+  hookAjaxEvaluateModal();
+  
+  // Cerrar modal
+  closeBtn.onclick = cerrarModal;
+  modalOverlay.onclick = cerrarModal;
+}
+
+function cerrarModal() {
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalBottom = document.getElementById('modalBottom');
+  
+  modalOverlay.classList.remove('active');
+  modalBottom.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function enhanceDateConstraintsModal() {
+  const modal = document.getElementById('modalContentCapacitacion');
+  const fi = modal.querySelector('input[name="fecha_inicio"]');
+  const ft = modal.querySelector('input[name="fecha_termino"]');
+  const tomorrow = (() => { const d = new Date(); d.setDate(d.getDate()+1); return d.toISOString().slice(0,10); })();
+  if (fi){ fi.min = tomorrow; }
+  if (ft){ ft.min = tomorrow; }
+  if (fi && ft){
+    fi.addEventListener('change', () => {
+      const minFt = fi.value || tomorrow;
+      ft.min = minFt;
+      if (ft.value && ft.value < minFt){ ft.value = minFt; }
+    });
+  }
+}
+
+function hookAjaxScheduleModal() {
+  const modal = document.getElementById('modalContentCapacitacion');
+  const form = modal.querySelector('#agendar-form');
+  if (!form) return;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = modal.querySelector('#panel-messages');
+    const lista = modal.querySelector('#lista-fichas');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const fd = new FormData(form);
+    if (msg) msg.innerHTML = '';
+    try {
+      submitBtn && (submitBtn.disabled = true);
+      const res = await fetch(form.action, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success){
+        const errores = (data && data.errors) ? data.errors.join('; ') : 'No se pudo agendar.';
+        if (msg){
+          msg.innerHTML = `<div style="padding:10px;border-radius:6px;background:#fee;color:#900;border:1px solid #f99;">${errores}</div>`;
+        } else {
+          alert(errores);
+        }
+        return;
+      }
+      const pid = form.dataset.postulacionId;
+      if (!FICHAS[pid]) FICHAS[pid] = [];
+      FICHAS[pid].unshift({
+        id: data.ficha.id,
+        nombre: data.ficha.nombre,
+        tipo: data.ficha.tipo,
+        inicio: data.ficha.inicio,
+        termino: data.ficha.termino,
+        estado: data.ficha.estado,
+      });
+      const itemHtml = renderFichaItem(data.ficha);
+      if (lista){
+        if (lista.querySelector('p.muted')){ lista.innerHTML = ''; }
+        lista.insertAdjacentHTML('afterbegin', itemHtml);
+      }
+      if (msg){
+        msg.innerHTML = `<div style="padding:10px;border-radius:6px;background:#eefcee;color:#065f46;border:1px solid #a7f3d0;">Capacitación agendada.</div>`;
+      }
+      form.reset();
+      enhanceDateConstraintsModal();
+    } catch (err){
+      if (msg){
+        msg.innerHTML = `<div style="padding:10px;border-radius:6px;background:#fee;color:#900;border:1px solid #f99;">Error de red. Intenta nuevamente.</div>`;
+      } else {
+        alert('Error de red.');
+      }
+    } finally {
+      submitBtn && (submitBtn.disabled = false);
+    }
+  });
+}
+
+function hookAjaxEvaluateModal() {
+  const modal = document.getElementById('modalContentCapacitacion');
+  const form = modal.querySelector('#evaluacion-form');
+  if (!form) return;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = modal.querySelector('#eval-messages');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const fd = new FormData(form);
+    if (msg) msg.innerHTML = '';
+    try {
+      submitBtn && (submitBtn.disabled = true);
+      const res = await fetch(form.action, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success){
+        const errores = (data && data.errors) ? data.errors.join('; ') : 'No se pudo registrar la evaluación.';
+        if (msg){
+          msg.innerHTML = `<div style="padding:10px;border-radius:6px;background:#fee;color:#900;border:1px solid #f99;">${errores}</div>`;
+        } else {
+          alert(errores);
+        }
+        return;
+      }
+      const fichaId = Number(form.dataset.fichaId);
+      const postId = String(form.dataset.postulacionId || CURRENT_POSTULACION_ID);
+      const fichas = FICHAS[postId] || [];
+      const idx = fichas.findIndex(f => Number(f.id) === fichaId);
+      if (idx !== -1){
+        fichas[idx].estado = data.ficha.estado;
+        const itemEl = modal.querySelector(`.item[data-ficha-id="${fichaId}"]`);
+        if (itemEl){
+          itemEl.outerHTML = renderFichaItem(fichas[idx]);
+        }
+      }
+      if (msg){
+        msg.innerHTML = `<div style="padding:10px;border-radius:6px;background:#eefcee;color:#065f46;border:1px solid #a7f3d0;">Evaluación registrada. Estado actualizado: ${data.ficha.estado}.</div>`;
+      }
+      form.reset();
+    } catch (err){
+      if (msg){
+        msg.innerHTML = `<div style="padding:10px;border-radius:6px;background:#fee;color:#900;border:1px solid #f99;">Error de red. Intenta nuevamente.</div>`;
+      } else {
+        alert('Error de red.');
+      }
+    } finally {
+      submitBtn && (submitBtn.disabled = false);
+    }
+  });
+}
+
+document.addEventListener('click', (e) => {
+  const card = e.target.closest('.item');
+  if (!card || !card.dataset.id) return;
+  
+  const d = card.dataset;
   CURRENT_POSTULACION_ID = d.id;
+  
+  // Si es móvil, mostrar modal
+  if (isMobile()) {
+    mostrarDetalleMovil(card);
+    return;
+  }
+  
+  // Desktop: comportamiento original
+  document.querySelectorAll('.item.active').forEach(n=>n.classList.remove('active'));
+  card.classList.add('active');
   // usar el id de la postulacion como clave
   const fichas = FICHAS[d.id] || [];
   const listaFichas = fichas.map(f => `

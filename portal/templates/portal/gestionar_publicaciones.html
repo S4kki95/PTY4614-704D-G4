@@ -5,138 +5,366 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestionar Publicaciones</title>
-  <link rel="stylesheet" href="{% static 'portal/style4.css' %}">
+  <link rel="stylesheet" href="{% static 'portal/style5.css' %}?v=18">
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body, html {
+      overflow-x: hidden;
+      max-width: 100vw;
+      margin: 0;
+      padding: 0;
+    }
+
+    .section {
+      padding: 20px;
+      min-height: calc(100vh - 140px);
+    }
+
+    .section h2 {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: #1e293b;
+    }
+
     .container {
       display: flex;
-      height: calc(100vh - 120px);
+      gap: 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+      height: calc(100vh - 220px);
     }
 
     /* --- LADO IZQUIERDO --- */
     .sidebar {
-      width: 35%;
-      border-right: 1px solid #ccc;
+      width: 360px;
+      border-right: 1px solid #e5e7eb;
       overflow-y: auto;
       background: #f8f9fa;
       padding: 10px;
+      border-radius: 8px;
     }
 
     .anuncio-item {
       background: white;
       border-radius: 8px;
-      padding: 12px;
+      padding: 15px;
       margin-bottom: 10px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s;
+      border-left: 4px solid transparent;
     }
 
     .anuncio-item:hover {
       background: #e7f0ff;
+      transform: translateX(2px);
+    }
+
+    .anuncio-item.active {
+      background: #dbeafe;
+      border-left-color: #2563eb;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
     }
 
     .anuncio-item h4 {
-      margin: 0;
+      margin: 0 0 6px 0;
       color: #004aad;
+      font-size: 16px;
+      font-weight: 600;
     }
 
     .anuncio-item small {
-      color: gray;
+      color: #64748b;
+      font-size: 13px;
+      display: block;
+      line-height: 1.4;
     }
 
     /* --- LADO DERECHO --- */
     .detalle {
-      flex-grow: 1;
+      flex: 1;
       padding: 30px;
       overflow-y: auto;
-      display: flex; /* convierte el panel en un contenedor flex */
-      justify-content: center; /* centra horizontalmente su contenido */
-      align-items: flex-start; /* mantener alineado al inicio verticalmente */
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .detalle > p {
+      text-align: center;
+      color: #64748b;
+      font-size: 16px;
+      margin-top: 60px;
     }
 
     .detalle h2 {
       margin-top: 0;
+      color: #1e293b;
+      font-size: 24px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .detalle form,
+    .detalle > div {
+      max-width: 100% !important;
+      width: 100% !important;
     }
 
     .detalle .info {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
 
     .detalle .info label {
       font-weight: 600;
       display: block;
-      margin-bottom: 3px;
+      margin-bottom: 8px;
+      color: #334155;
+      font-size: 15px;
     }
 
     .detalle .info span {
       display: block;
-      background: #f1f1f1;
-      padding: 8px;
-      border-radius: 5px;
+      background: #f8fafc;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .detalle input[type="text"],
+    .detalle input[type="number"],
+    .detalle select,
+    .detalle textarea {
+      width: 100% !important;
+      max-width: 100% !important;
+      padding: 12px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: inherit;
+      background: white;
+      box-sizing: border-box;
+    }
+
+    .detalle input:focus,
+    .detalle select:focus,
+    .detalle textarea:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .detalle textarea {
+      min-height: 100px;
+      line-height: 1.5;
     }
 
     .acciones {
-      margin-top: 20px;
-    }
-
-    /* Centrar el contenido interno y limitar su ancho para que no estire en exceso */
-    .detalle > * {
-      width: 100%;
-      max-width: 900px; /* ajusta este valor según necesites */
-      margin: 0 auto;
+      margin-top: 24px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-top: 20px;
+      border-top: 2px solid #f1f5f9;
     }
 
     .acciones button,
     .acciones a {
       background: #004aad;
       color: white;
-      padding: 8px 12px;
-      border-radius: 5px;
+      padding: 10px 20px;
+      border-radius: 6px;
       text-decoration: none;
       border: none;
       cursor: pointer;
-      margin-right: 8px;
+      font-weight: 600;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+
+    .acciones button:hover {
+      background: #003b8a;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px rgba(0, 74, 173, 0.2);
     }
 
     .acciones a {
       background: #dc3545;
     }
 
+    .acciones a:hover {
+      background: #bb2d3b;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px rgba(220, 53, 69, 0.2);
+    }
+
     textarea {
-      resize: none;              /* Desactiva el control de cambio de tamaño manual */
-      overflow-y: hidden;        /* Evita barras de desplazamiento vertical */
-      min-height: 80px;          /* Altura mínima */
-      transition: height 0.2s ease; /* Suaviza el cambio de tamaño */
+      resize: none;
+      overflow-y: hidden;
+      min-height: 80px;
+      transition: height 0.2s ease;
+    }
+
+    /* Modal bottom sheet para móvil */
+    .modal-overlay-custom {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal-overlay-custom.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-bottom {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -5px 20px rgba(0,0,0,0.3);
+      max-height: 85vh;
+      z-index: 1000;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-bottom.active {
+      transform: translateY(0);
+    }
+
+    .modal-header-custom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e5e7eb;
+      flex-shrink: 0;
+      background: white;
+      border-radius: 20px 20px 0 0;
+    }
+
+    .modal-header-custom h3 {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .modal-close-custom {
+      background: #f1f5f9;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 24px;
+      line-height: 1;
+      color: #64748b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .modal-close-custom:hover {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    #modalContentGestion {
+      overflow-y: auto;
+      padding: 20px;
+      flex: 1;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .section {
+        padding: 15px;
+        min-height: auto;
+      }
+
+      .container {
+        flex-direction: column;
+        height: auto;
+        gap: 0;
+      }
+
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        max-height: none;
+        padding: 5px;
+        border-radius: 0;
+        background: transparent;
+      }
+
+      .anuncio-item {
+        padding: 15px;
+      }
+
+      .detalle {
+        display: none !important;
+      }
+
+      .acciones {
+        flex-direction: column;
+      }
+
+      .acciones button,
+      .acciones a {
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .anuncio-item h4 {
+        font-size: 15px;
+      }
+
+      .anuncio-item small {
+        font-size: 12px;
+      }
     }
   </style>
 </head>
 <body data-role="{{ user.role }}">
 
-  <!-- Header -->
-  <header class="header">
-    <div class="brand">Portal de Prácticas TI</div>
-    <ul class="nav">
-      <li><a href="{% url 'portal_empresas' %}">Inicio</a></li>
-      {% if user.role == 'empresa' %}
-        <li><a href="{% url 'publicar_anuncio' %}">Publicar Anuncio</a></li>
-        <li><a href="{% url 'ver_postulaciones_empresa' %}">Ver Postulaciones</a></li>
-      {% endif %}
-      <li><a href="#funcionalidades">Capacitación</a></li>
-      <li><a href="{% url 'logout' %}">Cerrar Sesión</a></li>
-    </ul>
-  </header>
+{% include 'portal/partials/_header_empresa.html' %}
 
-  <section class="container">
+  <section class="section">
+    <h2 style="text-align: center; margin-top: 0;">Gestionar Publicaciones</h2>
+    
+    <div class="container">
     <!-- Sidebar izquierda -->
     <div class="sidebar">
       {% for anuncio in anuncios %}
-  <div class="anuncio-item" data-id="{{ anuncio.id }}">
+        <div class="anuncio-item" data-id="{{ anuncio.id }}">
           <h4>{{ anuncio.titulo }}</h4>
           <small>{{ anuncio.ubicacion }} — {{ anuncio.get_modalidad_display }}</small><br>
           <small>{{ anuncio.tipo_practica|default:"Práctica profesional" }}</small>
         </div>
       {% empty %}
-        <p>No tienes publicaciones aún.</p>
+        <p style="padding: 20px;">No tienes publicaciones aún.</p>
       {% endfor %}
     </div>
 
@@ -149,79 +377,183 @@
       {% endif %}
       <p>Selecciona una publicación para ver sus detalles.</p>
     </div>
+    </div>
   </section>
+
+  <!-- Overlay para modal móvil -->
+  <div class="modal-overlay-custom" id="modalOverlay"></div>
+
+  <!-- Modal bottom sheet para móvil -->
+  <div class="modal-bottom" id="modalBottom">
+    <div class="modal-header-custom">
+      <h3>Editar Publicación</h3>
+      <button class="modal-close-custom" aria-label="Cerrar">×</button>
+    </div>
+    <div id="modalContentGestion"></div>
+  </div>
 
   {% include 'portal/partials/_footer.html' %}
 
   <script>
-  // bandera de rol a partir del DOM (evita incrustar bloques de plantilla en JS)
   const IS_CAPACITADOR = (document.body.dataset.role === 'capacitador');
-  // delegación de eventos para cargar detalle sin inline handlers
+  
+  // Delegación de eventos para cargar detalle
   document.addEventListener('click', (e) => {
     const item = e.target.closest('.anuncio-item');
     if (item && item.dataset.id) {
       const id = item.dataset.id;
+      
+      // Marcar item como activo
+      document.querySelectorAll('.anuncio-item').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+      
       mostrarDetalle(id);
     }
   });
+
   function mostrarDetalle(id) {
+    const isMobile = window.innerWidth <= 768;
+    
     fetch(`/portal/editar_publicacion/${id}/`, {
       headers: {"X-Requested-With": "XMLHttpRequest"}
     })
     .then(response => response.json())
     .then(data => {
       if (!data.success) {
-        document.getElementById("detalle").innerHTML = data.html_form;
-        // si es capacitador, deshabilitar inputs
-        if (IS_CAPACITADOR) {
-          const container = document.getElementById("detalle");
-          container.querySelectorAll('input, textarea, select, button[type="submit"]').forEach(el => {
-            el.setAttribute('disabled', 'disabled');
-          });
-        }
-        // Ajusta el formulario para guardar sin salir
-        const form = document.querySelector("#detalle form");
-        form.onsubmit = function(e) {
-          // bloquear envío en capacitador (solo lectura)
-          if (IS_CAPACITADOR) {
-            e.preventDefault();
-            return false;
+        const htmlContent = data.html_form;
+        
+        if (isMobile) {
+          // Mostrar en modal móvil
+          const modalContent = document.getElementById('modalContentGestion');
+          const modalOverlay = document.getElementById('modalOverlay');
+          const modalBottom = document.getElementById('modalBottom');
+          
+          if (modalContent) {
+            modalContent.innerHTML = htmlContent;
           }
-          e.preventDefault();
-          fetch(form.action, {
-            method: "POST",
-            body: new FormData(form),
-            headers: {"X-Requested-With": "XMLHttpRequest"}
-          })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              window.location.reload();
-            } else {
-              document.getElementById("detalle").innerHTML = data.html_form;
-            }
-          });
-        };
+          if (modalOverlay) {
+            modalOverlay.classList.add('active');
+          }
+          if (modalBottom) {
+            modalBottom.classList.add('active');
+          }
+          
+          // Si es capacitador, deshabilitar inputs en el modal
+          if (IS_CAPACITADOR) {
+            modalContent.querySelectorAll('input, textarea, select, button[type="submit"]').forEach(el => {
+              el.setAttribute('disabled', 'disabled');
+            });
+          }
+          
+          // Configurar formulario en modal
+          setupForm(modalContent.querySelector('form'));
+        } else {
+          // Mostrar en panel desktop
+          document.getElementById("detalle").innerHTML = htmlContent;
+          
+          // Si es capacitador, deshabilitar inputs
+          if (IS_CAPACITADOR) {
+            const container = document.getElementById("detalle");
+            container.querySelectorAll('input, textarea, select, button[type="submit"]').forEach(el => {
+              el.setAttribute('disabled', 'disabled');
+            });
+          }
+          
+          // Configurar formulario en desktop
+          setupForm(document.querySelector("#detalle form"));
+        }
       }
     });
   }
 
-document.addEventListener("input", function(e) {
-  if (e.target.tagName.toLowerCase() === "textarea") {
-    e.target.style.height = "auto";               // Reinicia la altura
-    e.target.style.height = (e.target.scrollHeight) + "px"; // Ajusta según contenido
+  function setupForm(form) {
+    if (!form) return;
+    
+    form.onsubmit = function(e) {
+      // Bloquear envío en capacitador (solo lectura)
+      if (IS_CAPACITADOR) {
+        e.preventDefault();
+        return false;
+      }
+      
+      e.preventDefault();
+      fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),
+        headers: {"X-Requested-With": "XMLHttpRequest"}
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          window.location.reload();
+        } else {
+          const isMobile = window.innerWidth <= 768;
+          if (isMobile) {
+            document.getElementById('modalContentGestion').innerHTML = data.html_form;
+            setupForm(document.querySelector('#modalContentGestion form'));
+          } else {
+            document.getElementById("detalle").innerHTML = data.html_form;
+            setupForm(document.querySelector("#detalle form"));
+          }
+        }
+      });
+    };
   }
-});
 
-
-window.addEventListener("load", () => {
-  document.querySelectorAll("textarea").forEach(t => {
-    t.style.height = "auto";
-    t.style.height = (t.scrollHeight) + "px";
+  // Auto-ajustar textareas
+  document.addEventListener("input", function(e) {
+    if (e.target.tagName.toLowerCase() === "textarea") {
+      e.target.style.height = "auto";
+      e.target.style.height = (e.target.scrollHeight) + "px";
+    }
   });
-});
 
+  window.addEventListener("load", () => {
+    document.querySelectorAll("textarea").forEach(t => {
+      t.style.height = "auto";
+      t.style.height = (t.scrollHeight) + "px";
+    });
+  });
+
+  // Auto-ajustar textareas
+  document.addEventListener("input", function(e) {
+    if (e.target.tagName.toLowerCase() === "textarea") {
+      e.target.style.height = "auto";
+      e.target.style.height = (e.target.scrollHeight) + "px";
+    }
+  });
+
+  window.addEventListener("load", () => {
+    document.querySelectorAll("textarea").forEach(t => {
+      t.style.height = "auto";
+      t.style.height = (t.scrollHeight) + "px";
+    });
+  });
+
+  // Cerrar modal
+  function cerrarModalGestion() {
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalBottom = document.getElementById('modalBottom');
+    if (modalOverlay && modalBottom) {
+      modalOverlay.classList.remove('active');
+      modalBottom.classList.remove('active');
+    }
+  }
+
+  // Event listeners para cerrar modal
+  document.addEventListener('DOMContentLoaded', function() {
+    const modalOverlay = document.getElementById('modalOverlay');
+    if (modalOverlay) {
+      modalOverlay.addEventListener('click', cerrarModalGestion);
+    }
+    
+    const closeBtn = document.querySelector('.modal-close-custom');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', cerrarModalGestion);
+    }
+  });
   </script>
 
 </body>
+</html>
 </html>
