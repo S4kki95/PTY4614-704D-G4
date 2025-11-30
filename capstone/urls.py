@@ -20,11 +20,11 @@ from django.urls import include
 from django.http import HttpResponse
 
 
-def home(request):
-    return HttpResponse("🚀 ¡Django en Render está funcionando!")
+def redirect_to_portal(request):
+    return redirect('index')  # Redirige a la vista 'index' definida en portal/urls.py
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('portal/', include('portal.urls')),
-    path("", home),  # Página principal
+    path("", redirect_to_portal),  # Página principal redirige a portal
 ]
