@@ -66,6 +66,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'capstone.middleware.Custom404Middleware',  # Middleware personalizado para manejar 404
 ]
 
 ROOT_URLCONF = 'capstone.urls'

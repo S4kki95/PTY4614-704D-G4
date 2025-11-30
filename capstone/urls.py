@@ -18,13 +18,27 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import include 
 from django.http import HttpResponse
+from django.shortcuts import redirect
 
 
 def redirect_to_portal(request):
     return redirect('index')  # Redirige a la vista 'index' definida en portal/urls.py
+
+def handler404_redirect(request, exception=None):
+    """Redirige URLs no encontradas según el estado de autenticación del usuario"""
+    if request.user.is_authenticated:
+        if hasattr(request.user, 'role'):
+            if request.user.role in ['empresa', 'capacitador']:
+                return redirect('portal_empresas')
+            elif request.user.role == 'alumno':
+                return redirect('portal_practicantes')
+    return redirect('index')
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('portal/', include('portal.urls')),
     path("", redirect_to_portal),  # Página principal redirige a portal
 ]
+
+# Handler para URLs no encontradas (404)
+handler404 = 'capstone.urls.handler404_redirect'
