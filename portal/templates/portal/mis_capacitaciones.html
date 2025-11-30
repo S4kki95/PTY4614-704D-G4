@@ -121,6 +121,9 @@
               {% if f.estado == 'completada' %}<span class="badge badge-c">Completada</span>{% endif %}
               {% if f.estado == 'cancelada' %}<span class="badge badge-x">Cancelada</span>{% endif %}
             </div>
+            {% if f.detalle %}
+            <div class="label">Detalle:</div><div class="value" style="background:#f8fafc;padding:10px;border-radius:6px;border-left:3px solid #2563eb">{{ f.detalle }}</div>
+            {% endif %}
           </div>
         </div>
         <div>

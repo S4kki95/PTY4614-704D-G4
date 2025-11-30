@@ -30,8 +30,18 @@ def login_view(request):
         form = EmailLoginForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
+            
+            # Verificar si la cuenta está habilitada (no aplica para staff/superuser)
+            if not user.is_staff and not user.is_superuser and not user.habilitado:
+                messages.error(request, "Tu cuenta está pendiente de verificación por el administrador. Por favor, espera la aprobación.")
+                return redirect("login")
+            
             login(request, user)
             messages.success(request, "Has iniciado sesión correctamente.", extra_tags='from_login')
+
+            # Si es staff o superuser, redirigir a admin analytics
+            if user.is_staff or user.is_superuser:
+                return redirect("admin_analytics")
 
             # Redirección según el rol del usuario
             if hasattr(user, "role"):
@@ -61,9 +71,15 @@ def registro_view(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Cuenta creada con éxito. Ahora puedes iniciar sesión.")
-            return redirect("login")  # Ajusta según tu URL de login
+            user = form.save()
+            
+            # Mensaje diferenciado según el rol
+            if user.role in ['empresa', 'capacitador']:
+                messages.success(request, "Cuenta creada con éxito. Tu cuenta está pendiente de verificación por el administrador. Serás notificado cuando puedas acceder.")
+            else:
+                messages.success(request, "Cuenta creada con éxito. Ahora puedes iniciar sesión.")
+            
+            return redirect("login")
         else:
             messages.error(request, "Por favor corrige los errores en el formulario.")
     else:
@@ -731,6 +747,26 @@ def evaluar_capacitacion(request, ficha_id):
 
 
 @login_required(login_url='login')
+def eliminar_capacitacion(request, ficha_id):
+    """Permite al capacitador/empresa eliminar una capacitación"""
+    if request.user.role not in ("capacitador", "empresa"):
+        messages.error(request, "No tienes permisos para realizar esta acción.")
+        return redirect("index")
+    
+    empresa_id = request.user.id if request.user.role == "empresa" else getattr(request.user, "company_id", None)
+    
+    try:
+        ficha = FichaCapacitacion.objects.get(id=ficha_id, empresa_id=empresa_id)
+        nombre = ficha.nombre_capacitacion
+        ficha.delete()
+        messages.success(request, f"Capacitación '{nombre}' eliminada exitosamente.")
+    except FichaCapacitacion.DoesNotExist:
+        messages.error(request, "Capacitación no encontrada o no tienes permisos.")
+    
+    return redirect("capacitaciones")
+
+
+@login_required(login_url='login')
 def cambiar_estado_postulacion(request, postulacion_id, nuevo_estado):
     if request.user.role != "empresa":
         messages.error(request, "Solo las empresas pueden cambiar el estado de postulaciones.")
@@ -839,6 +875,19 @@ def admin_analytics(request):
     )
     tipos = list(AnuncioPractica.objects.values_list('tipo_practica', flat=True).distinct())
 
+    # NUEVO: Obtener empresas con sus capacitadores
+    from .models import CustomUser
+    empresas = CustomUser.objects.filter(role='empresa').prefetch_related('capacitadores').order_by('-date_joined')
+    
+    # Crear estructura de datos: empresa con sus capacitadores
+    empresas_con_capacitadores = []
+    for empresa in empresas:
+        capacitadores = empresa.capacitadores.all()
+        empresas_con_capacitadores.append({
+            'empresa': empresa,
+            'capacitadores': capacitadores
+        })
+
     return render(request, 'portal/admin_analytics.html', {
         'filters': {
             'start': start or '', 'end': end or '', 'institucion': institucion, 'tipo': tipo, 'estado': estado
@@ -855,4 +904,65 @@ def admin_analytics(request):
         'rechazos_por_inst': list(rechazos_por_inst),
         'por_tipo': list(por_tipo),
         'logs': logs,
+        'empresas_con_capacitadores': empresas_con_capacitadores,
     })
+
+
+@login_required
+def cambiar_habilitacion_cuenta(request, user_id):
+    """Permite al admin habilitar/deshabilitar cuentas de empresas y capacitadores"""
+    if not request.user.is_staff:
+        messages.error(request, "No tienes permisos para realizar esta acción.")
+        return redirect('index')
+    
+    from .models import CustomUser
+    try:
+        usuario = CustomUser.objects.get(id=user_id)
+        
+        # Solo permitir cambiar estado de empresas y capacitadores
+        if usuario.role not in ['empresa', 'capacitador']:
+            messages.error(request, "Solo se puede cambiar el estado de empresas y capacitadores.")
+            return redirect('admin_analytics')
+        
+        # Cambiar el estado
+        usuario.habilitado = not usuario.habilitado
+        usuario.save()
+        
+        estado_texto = "habilitada" if usuario.habilitado else "deshabilitada"
+        messages.success(request, f"Cuenta de {usuario.email} {estado_texto} exitosamente.")
+        
+    except CustomUser.DoesNotExist:
+        messages.error(request, "Usuario no encontrado.")
+    
+    return redirect('admin_analytics')
+
+
+@login_required
+def eliminar_cuenta(request, user_id):
+    """Permite al admin eliminar cuentas de empresas y capacitadores"""
+    if not request.user.is_staff:
+        messages.error(request, "No tienes permisos para realizar esta acción.")
+        return redirect('index')
+    
+    from .models import CustomUser
+    try:
+        usuario = CustomUser.objects.get(id=user_id)
+        
+        # Evitar que el admin se elimine a sí mismo
+        if usuario.id == request.user.id:
+            messages.error(request, "No puedes eliminar tu propia cuenta.")
+            return redirect('admin_analytics')
+        
+        # Evitar eliminar otros superusuarios
+        if usuario.is_superuser:
+            messages.error(request, "No se pueden eliminar cuentas de superusuarios.")
+            return redirect('admin_analytics')
+        
+        email = usuario.email
+        usuario.delete()
+        messages.success(request, f"Cuenta de {email} eliminada exitosamente.")
+        
+    except CustomUser.DoesNotExist:
+        messages.error(request, "Usuario no encontrado.")
+    
+    return redirect('admin_analytics')

@@ -280,12 +280,19 @@ class FichaCapacitacionForm(forms.ModelForm):
         fields = [
             "nombre_capacitacion",
             "tipo_capacitacion",
+            "detalle",
             "fecha_inicio",
             "fecha_termino",
         ]
         widgets = {
             "nombre_capacitacion": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ej: Onboarding TI"}),
             "tipo_capacitacion": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ej: Técnica / Soft skills"}),
+            "detalle": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 4,
+                "maxlength": "250",
+                "placeholder": "Ej: A las 16:00 Hrs llama a este número +56 98282828 o ingresa al link de Zoom..."
+            }),
             "fecha_inicio": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
             "fecha_termino": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
         }

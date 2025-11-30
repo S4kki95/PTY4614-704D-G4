@@ -18,6 +18,10 @@ class Custom404Middleware:
         except Resolver404:
             # URL no encontrada, redirigir según usuario
             if request.user.is_authenticated:
+                # Si es admin/staff, redirigir a analytics
+                if request.user.is_staff or request.user.is_superuser:
+                    return redirect('admin_analytics')
+                
                 if hasattr(request.user, 'role'):
                     if request.user.role in ['empresa', 'capacitador']:
                         return redirect('portal_empresas')

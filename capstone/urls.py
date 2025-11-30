@@ -27,6 +27,10 @@ def redirect_to_portal(request):
 def handler404_redirect(request, exception=None):
     """Redirige URLs no encontradas según el estado de autenticación del usuario"""
     if request.user.is_authenticated:
+        # Si es admin/staff, redirigir a analytics
+        if request.user.is_staff or request.user.is_superuser:
+            return redirect('admin_analytics')
+        
         if hasattr(request.user, 'role'):
             if request.user.role in ['empresa', 'capacitador']:
                 return redirect('portal_empresas')

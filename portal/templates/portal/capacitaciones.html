@@ -343,6 +343,10 @@ document.addEventListener('click', (e) => {
             <input name="tipo_capacitacion" class="form-control" placeholder="Ej: Técnica" required />
           </div>
         </div>
+        <div style="margin-top:10px">
+          <label>Detalle <span style="color:#64748b;font-size:12px">(máx. 250 caracteres)</span></label>
+          <textarea name="detalle" class="form-control" rows="3" maxlength="250" placeholder="Ej: A las 16:00 Hrs llama a este número +56 98282828 o ingresa al link de Zoom..." required></textarea>
+        </div>
         <div class="form-row" style="margin-top:10px">
           <div>
             <label>Fecha inicio</label>
@@ -412,8 +416,12 @@ function mostrarDetalleMovil(card) {
           <div class="muted">${f.inicio} → ${f.termino}</div>
           <div class="muted">Estado: ${f.estado}</div>
         </div>
-        <div>
+        <div style="display:flex;gap:8px">
           <button class="btn btn-secondary" onclick="seleccionarFicha(${f.id})">Evaluar</button>
+          <form method="post" action="/portal/capacitaciones/ficha/${f.id}/eliminar/" style="display:inline;margin:0" onsubmit="return confirm('¿Eliminar capacitación ${f.nombre}?');">
+            ${csrfToken()}
+            <button type="submit" class="btn" style="background:#dc2626;color:#fff">🗑️</button>
+          </form>
         </div>
       </div>
   `).join('');
@@ -453,6 +461,10 @@ function mostrarDetalleMovil(card) {
             <label>Fecha término</label>
             <input type="date" name="fecha_termino" class="form-control" required />
           </div>
+        </div>
+        <div style="margin-top:10px">
+          <label>Detalle <span style="color:#64748b;font-size:12px">(máx. 250 caracteres)</span></label>
+          <textarea name="detalle" class="form-control" rows="3" maxlength="250" placeholder="Ej: A las 16:00 Hrs llama a este número +56 98282828..." required></textarea>
         </div>
         <div class="actions" style="margin-top:12px">
           <button class="btn btn-primary" type="submit" style="width:100%;">Agendar</button>
@@ -673,8 +685,12 @@ document.addEventListener('click', (e) => {
           <div class="muted">${f.inicio} → ${f.termino}</div>
           <div class="muted">Estado: ${f.estado}</div>
         </div>
-        <div>
+        <div style="display:flex;gap:8px">
           <button class="btn btn-secondary" onclick="seleccionarFicha(${f.id})">Evaluar</button>
+          <form method="post" action="/portal/capacitaciones/ficha/${f.id}/eliminar/" style="display:inline;margin:0" onsubmit="return confirm('¿Eliminar capacitación ${f.nombre}?');">
+            ${csrfToken()}
+            <button type="submit" class="btn" style="background:#dc2626;color:#fff">🗑️</button>
+          </form>
         </div>
       </div>
   `).join('');
@@ -713,6 +729,10 @@ document.addEventListener('click', (e) => {
             <label>Fecha término</label>
             <input type="date" name="fecha_termino" class="form-control" required />
           </div>
+        </div>
+        <div style="margin-top:10px">
+          <label>Detalle <span style="color:#64748b;font-size:12px">(máx. 250 caracteres)</span></label>
+          <textarea name="detalle" class="form-control" rows="3" maxlength="250" placeholder="Ej: A las 16:00 Hrs llama a este número +56 98282828 o ingresa al link de Zoom..." required></textarea>
         </div>
         <div class="actions" style="margin-top:12px">
           <button class="btn btn-primary" type="submit">Agendar</button>
@@ -932,8 +952,12 @@ function renderFichaItem(f){
         <div class="muted">${f.inicio} → ${f.termino}</div>
         <div class="muted">Estado: ${f.estado}</div>
       </div>
-      <div>
+      <div style="display:flex;gap:8px">
         <button class="btn btn-secondary" onclick="seleccionarFicha(${f.id})">Evaluar</button>
+        <form method="post" action="/portal/capacitaciones/ficha/${f.id}/eliminar/" style="display:inline;margin:0" onsubmit="return confirm('¿Eliminar capacitación ${f.nombre}?');">
+          ${csrfToken()}
+          <button type="submit" class="btn" style="background:#dc2626;color:#fff">🗑️</button>
+        </form>
       </div>
     </div>
   `;

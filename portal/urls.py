@@ -30,8 +30,13 @@ urlpatterns = [
     path("capacitaciones/", views.capacitaciones, name="capacitaciones"),
     path("capacitaciones/<int:postulacion_id>/agendar/", views.agendar_capacitacion, name="agendar_capacitacion"),
     path("capacitaciones/ficha/<int:ficha_id>/evaluar/", views.evaluar_capacitacion, name="evaluar_capacitacion"),
+    path("capacitaciones/ficha/<int:ficha_id>/eliminar/", views.eliminar_capacitacion, name="eliminar_capacitacion"),
     # Admin analytics (staff)
     path("admin/analytics/", views.admin_analytics, name="admin_analytics"),
     # Friendly alias to avoid confusion with Django Admin at /admin/
     path("analytics/", views.admin_analytics, name="analytics"),
+    # Cambiar habilitación de cuentas
+    path("admin/usuarios/<int:user_id>/cambiar-habilitacion/", views.cambiar_habilitacion_cuenta, name="cambiar_habilitacion_cuenta"),
+    # Eliminar cuentas
+    path("admin/usuarios/<int:user_id>/eliminar/", views.eliminar_cuenta, name="eliminar_cuenta"),
 ]

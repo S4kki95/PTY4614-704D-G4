@@ -94,6 +94,112 @@
     </div>
   </div>
 
+  <h2 style="margin-top:24px">Empresas y Capacitadores</h2>
+  <div class="card">
+    {% for item in empresas_con_capacitadores %}
+      <div style="margin-bottom:24px;padding:16px;background:#f9fafb;border-radius:8px">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px">
+          <div>
+            <h3 style="margin:0;color:#1e40af">
+              🏢 {{ item.empresa.email }}
+              {% if item.empresa.company_name %}({{ item.empresa.company_name }}){% endif %}
+            </h3>
+            <p style="margin:4px 0;color:#64748b;font-size:14px">
+              Registrado: {{ item.empresa.date_joined|date:'d-m-Y' }} • 
+              Estado cuenta: {% if item.empresa.is_active %}<span style="color:#16a34a">✓ Activa</span>{% else %}<span style="color:#dc2626">✗ Inactiva</span>{% endif %} •
+              Acceso: {% if item.empresa.habilitado %}<span style="color:#16a34a">✓ Habilitado</span>{% else %}<span style="color:#dc2626">✗ Deshabilitado</span>{% endif %}
+            </p>
+          </div>
+          <div style="display:flex;gap:8px">
+            <form method="post" action="{% url 'cambiar_habilitacion_cuenta' item.empresa.id %}" style="display:inline">
+              {% csrf_token %}
+              {% if item.empresa.habilitado %}
+                <button type="submit" style="background:#dc2626;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px">
+                  🚫 Deshabilitar
+                </button>
+              {% else %}
+                <button type="submit" style="background:#16a34a;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px">
+                  ✅ Habilitar
+                </button>
+              {% endif %}
+            </form>
+            <form method="post" action="{% url 'eliminar_cuenta' item.empresa.id %}" style="display:inline" onsubmit="return confirm('¿Estás seguro de eliminar esta cuenta? Esta acción no se puede deshacer.');">
+              {% csrf_token %}
+              <button type="submit" style="background:#7c2d12;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px">
+                🗑️ Eliminar
+              </button>
+            </form>
+          </div>
+        </div>
+        
+        {% if item.capacitadores %}
+          <div style="margin-top:12px">
+            <p style="font-weight:600;margin-bottom:8px">👥 Capacitadores asociados ({{ item.capacitadores.count }}):</p>
+            <table style="background:#fff;margin-top:8px">
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Usuario</th>
+                  <th>Fecha registro</th>
+                  <th>Estado</th>
+                  <th>Acceso</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for cap in item.capacitadores %}
+                  <tr>
+                    <td>{{ cap.email }}</td>
+                    <td>{{ cap.username }}</td>
+                    <td>{{ cap.date_joined|date:'d-m-Y H:i' }}</td>
+                    <td>
+                      {% if cap.is_active %}
+                        <span style="color:#16a34a">✓ Activo</span>
+                      {% else %}
+                        <span style="color:#dc2626">✗ Inactivo</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if cap.habilitado %}
+                        <span style="color:#16a34a">✓ Habilitado</span>
+                      {% else %}
+                        <span style="color:#dc2626">✗ Deshabilitado</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <form method="post" action="{% url 'cambiar_habilitacion_cuenta' cap.id %}" style="display:inline">
+                        {% csrf_token %}
+                        {% if cap.habilitado %}
+                          <button type="submit" style="background:#dc2626;color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:12px">
+                            Deshabilitar
+                          </button>
+                        {% else %}
+                          <button type="submit" style="background:#16a34a;color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:12px">
+                            Habilitar
+                          </button>
+                        {% endif %}
+                      </form>
+                      <form method="post" action="{% url 'eliminar_cuenta' cap.id %}" style="display:inline;margin-left:4px" onsubmit="return confirm('¿Eliminar cuenta de {{ cap.email }}?');">
+                        {% csrf_token %}
+                        <button type="submit" style="background:#7c2d12;color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:12px">
+                          🗑️
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p style="color:#64748b;font-style:italic;margin-top:8px">Sin capacitadores asociados</p>
+        {% endif %}
+      </div>
+    {% empty %}
+      <p class="muted">No hay empresas registradas.</p>
+    {% endfor %}
+  </div>
+
   <h2 style="margin-top:24px">Logs recientes</h2>
   <div class="card">
     <table>

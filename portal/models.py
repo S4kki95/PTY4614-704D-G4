@@ -27,6 +27,16 @@ class CustomUser(AbstractUser):
         related_name="capacitadores",
         limit_choices_to={"role": "empresa"},
     )
+    habilitado = models.BooleanField(
+        default=True,
+        help_text="Determina si la cuenta puede acceder al sistema. Empresas y capacitadores requieren verificación por admin."
+    )
+
+    def save(self, *args, **kwargs):
+        # Si es una cuenta nueva de empresa o capacitador, establecer habilitado=False
+        if not self.pk and self.role in ['empresa', 'capacitador']:
+            self.habilitado = False
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.username} ({self.role})"
@@ -193,6 +203,12 @@ class FichaCapacitacion(models.Model):
     )
     nombre_capacitacion = models.CharField(max_length=200)
     tipo_capacitacion = models.CharField(max_length=200)
+    detalle = models.TextField(
+        max_length=250,
+        blank=True,
+        null=True,
+        help_text="Detalles adicionales: horario, contacto, ubicación, etc. (máx. 250 caracteres)"
+    )
     fecha_inicio = models.DateField()
     fecha_termino = models.DateField()
     estado = models.CharField(
