@@ -91,13 +91,23 @@
              value="{{ form.cupos.value|default_if_none:'' }}" {% if readonly %}disabled{% endif %} min="1" required>
         </div>
 
-        <!-- Botón -->
+        <!-- Botón Guardar -->
                 {% if not readonly %}
                     <div class="form-actions">
                             <button type="submit" class="btn-primary">Guardar cambios</button>
                     </div>
                 {% endif %}
     </form>
+
+    <!-- Formulario de Eliminación (separado) -->
+    {% if not readonly %}
+    <form method="post" action="{% url 'eliminar_publicacion' anuncio.id %}" style="margin-top: 10px;" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta publicación? Esta acción no se puede deshacer.');">
+        {% csrf_token %}
+        <button type="submit" style="background: #dc3545; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600; transition: all 0.2s; width: 100%;">
+            🗑️ Eliminar Publicación
+        </button>
+    </form>
+    {% endif %}
 </div>
  
 <script>

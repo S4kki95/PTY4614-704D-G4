@@ -184,9 +184,10 @@ def editar_publicacion(request, anuncio_id):
 
 @login_required(login_url='login')
 def eliminar_publicacion(request, anuncio_id):
-    anuncio = get_object_or_404(AnuncioPractica, id=anuncio_id, empresa=request.user)
-    anuncio.delete()
-    messages.success(request, "Publicación eliminada correctamente.")
+    if request.method == "POST":
+        anuncio = get_object_or_404(AnuncioPractica, id=anuncio_id, empresa=request.user)
+        anuncio.delete()
+        messages.success(request, "Publicación eliminada correctamente.")
     return redirect("gestionar_publicaciones")
 
 
