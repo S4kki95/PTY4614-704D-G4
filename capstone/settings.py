@@ -41,7 +41,7 @@ SECRET_KEY = 'django-insecure-m%glgd8nml^1u2q36p60-h5hiu0qsnn^2=ik8ny)oh8s0p)+52
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["capstone-zblx.onrender.com", "localhost", "127.0.0.1","capstone-32.onrender.com"]
+ALLOWED_HOSTS = ["capstone-zblx.onrender.com", "localhost", "127.0.0.1","proyecto-bxl5.onrender.com"]
 
 
 
@@ -120,7 +120,7 @@ AUTH_USER_MODEL = "portal.CustomUser"
 
 
 AUTHENTICATION_BACKENDS = [
-    "portal.backends.EmailBackend",   # login con email
+    "portal.backends.EmailOrUsernameBackend",   # login con email o username
     "django.contrib.auth.backends.ModelBackend",  # fallback
 ]
 
@@ -170,3 +170,13 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configuración de email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'simutechoficial@gmail.com'
+EMAIL_HOST_PASSWORD = 'fmnwgfsurlocflqz'
+DEFAULT_FROM_EMAIL = 'simutechoficial@gmail.com'
+ADMIN_EMAIL = 'simutechoficial@gmail.com'

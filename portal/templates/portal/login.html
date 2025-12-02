@@ -136,7 +136,7 @@
         {% csrf_token %}
         {{ form.non_field_errors }}
 
-        <label for="id_username">Correo:</label>
+        <label for="id_username">Correo o nombre de usuario:</label>
         {{ form.username }}
         {% if form.username.errors %}
           <div class="error" style="color:red;">{{ form.username.errors }}</div>

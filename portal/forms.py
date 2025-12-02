@@ -132,9 +132,9 @@ class AnuncioPracticaForm(forms.ModelForm):
         
 
 class EmailLoginForm(AuthenticationForm):
-    username = forms.EmailField(
-        label="Correo",
-        widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "Correo"})
+    username = forms.CharField(
+        label="Correo o Usuario",
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Correo o nombre de usuario"})
     )
 
 class PerfilEmpresaForm(forms.ModelForm):

@@ -14,6 +14,7 @@ from django.contrib import messages
 from django.template.loader import render_to_string
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.mail import send_mail
 from supabase import create_client, Client
 from django.db.models import Q, Count
 
@@ -72,9 +73,63 @@ def registro_view(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            role = user.role
+            
+            # Si es empresa o capacitador, enviar notificación al admin
+            if role in ['empresa', 'capacitador']:
+                subject = f'Nueva cuenta {role.capitalize()} creada - Requiere validación'
+                
+                if role == 'empresa':
+                    company_info = user.company_name or 'Sin nombre'
+                    message = f"""Se ha registrado una nueva cuenta de EMPRESA en el Portal de Prácticas TI.
+
+Detalles:
+- Nombre de usuario: {user.username}
+- Email: {user.email}
+- Nombre de la empresa: {company_info}
+- Fecha de registro: {user.date_joined.strftime('%d/%m/%Y %H:%M')}
+
+Por favor, ingresa al panel de Analytics para validar esta cuenta:
+{request.build_absolute_uri('/analytics/')}
+
+Este es un correo automático, no responder.
+"""
+                else:  # capacitador
+                    company_name = user.company.company_name if user.company else 'Sin empresa asignada'
+                    message = f"""Se ha registrado una nueva cuenta de CAPACITADOR en el Portal de Prácticas TI.
+
+Detalles:
+- Nombre de usuario: {user.username}
+- Email: {user.email}
+- Empresa asociada: {company_name}
+- Fecha de registro: {user.date_joined.strftime('%d/%m/%Y %H:%M')}
+
+Por favor, ingresa al panel de Analytics para validar esta cuenta:
+{request.build_absolute_uri('/analytics/')}
+
+Este es un correo automático, no responder.
+"""
+                
+                try:
+                    send_mail(
+                        subject,
+                        message,
+                        settings.DEFAULT_FROM_EMAIL,
+                        [settings.ADMIN_EMAIL],
+                        fail_silently=False,
+                    )
+                except Exception as e:
+                    # Log del error pero no detener el registro
+                    print(f"Error al enviar email: {e}")
+            
+            # Crear perfil según rol
+            if role == "postulante" or role == "alumno":
+                PerfilPostulante.objects.get_or_create(user=user)
+            elif role == "empresa":
+                PerfilEmpresa.objects.get_or_create(user=user)
             
             # Mensaje diferenciado según el rol
-            if user.role in ['empresa', 'capacitador']:
+            if role in ['empresa', 'capacitador']:
                 messages.success(request, "Cuenta creada con éxito. Tu cuenta está pendiente de verificación por el administrador. Serás notificado cuando puedas acceder.")
             else:
                 messages.success(request, "Cuenta creada con éxito. Ahora puedes iniciar sesión.")
