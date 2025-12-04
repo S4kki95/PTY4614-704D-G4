@@ -199,9 +199,20 @@ def gestionar_publicaciones(request):
 
     # Trae los anuncios de la empresa (si es capacitador, de su empresa asignada)
     if request.user.role == "empresa":
-        anuncios = AnuncioPractica.objects.filter(empresa=request.user)
+        anuncios_list = AnuncioPractica.objects.filter(empresa=request.user).order_by('-id')
     else:
-        anuncios = AnuncioPractica.objects.filter(empresa=getattr(request.user, "company", None))
+        anuncios_list = AnuncioPractica.objects.filter(empresa=getattr(request.user, "company", None)).order_by('-id')
+
+    # Paginación: 6 anuncios por página
+    paginator = Paginator(anuncios_list, 6)
+    page = request.GET.get('page')
+    
+    try:
+        anuncios = paginator.page(page)
+    except PageNotAnInteger:
+        anuncios = paginator.page(1)
+    except EmptyPage:
+        anuncios = paginator.page(paginator.num_pages)
 
     return render(request, "portal/gestionar_publicaciones.html", {"anuncios": anuncios})
 

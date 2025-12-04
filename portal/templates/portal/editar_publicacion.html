@@ -1,6 +1,7 @@
 {% load static %}
 <div class="form-container">
-    <link rel="stylesheet" href="{% static 'portal/style6.css' %}">
+    <link rel="stylesheet" href="{% static 'portal/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'portal/css/empresas.css' %}">
 
     <form method="post" action="{% url 'editar_publicacion' anuncio.id %}" class="form-editar" {% if readonly %}data-readonly="true"{% endif %}>
         {% csrf_token %}

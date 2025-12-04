@@ -1,299 +1,492 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-
-:root{
-  --blue-900:#0c3b66;
-  --blue-800:#174a7e;
-  --blue-600:#2a66a5;
-  --bg:#f3f7fb;
-  --text:#0f2c4d;
-  --muted:#5f7591;
-  --card:#ffffff;
-  --shadow:0 10px 25px rgba(16,53,89,.08);
-  --radius:16px;
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
 }
 
-*{box-sizing:border-box}
-html,body{margin:0;padding:0}
-body{
-  font-family:'Inter',system-ui,Arial,Helvetica,sans-serif;
-  color:var(--text);
-  background:var(--bg);
+/* Header */
+.header {
+  background: #0a3d62;
+  color: #fff;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* Header / Navbar */
-.header{
-  background:var(--blue-800);
-  color:#fff;
-  padding:18px 28px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+.header .brand {
+  font-size: 1.3rem;
+  font-weight: bold;
 }
-.brand{font-weight:800;font-size:22px;letter-spacing:.2px}
-.nav{list-style:none;display:flex;gap:24px;margin:0;padding:0}
-.nav a{color:#eaf2fb;text-decoration:none;font-weight:600;opacity:.95}
-.nav a:hover{opacity:1;text-decoration:underline}
 
-/* Hero / Carousel */
-.hero{
-  max-width:1100px;margin:24px auto 0; padding:0 24px;
+.header .nav {
+  list-style: none;
+  display: flex;
+  gap: 20px;
 }
-.slider{
-  position:relative;height:420px;border-radius:18px;overflow:hidden;box-shadow:var(--shadow);
-}
-.track{display:flex;width:300%;height:100%;animation:slide 18s infinite}
-.slide{min-width:100%;height:100%;display:flex;align-items:center;justify-content:flex-start;background-position:center;background-size:cover}
-.overlay{
-  margin-left:48px; max-width:640px; background:rgba(10,34,61,.55);
-  color:#fff;padding:24px 28px;border-radius:14px;backdrop-filter: blur(2px);
-}
-.overlay h1{margin:0 0 8px;font-size:36px;line-height:1.15;font-weight:800}
-.overlay p{margin:0;font-size:16px;opacity:.95}
 
-/* Sections */
-.section{max-width:1100px;margin:28px auto;padding:0 24px}
-.section h2{font-size:28px;margin:8px 0 12px}
-.section p{color:var(--muted);line-height:1.6}
-
-/* Cards grid */
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:8px}
-.card{
-  background:var(--card);border-radius:14px;padding:22px;box-shadow:var(--shadow);
+.header .nav li a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
 }
-.card h3{margin:4px 0 6px;font-size:18px}
-.card p{margin:0;color:var(--muted);font-size:14px}
 
-/* Icons (inline SVG) */
-.icon{width:38px;height:38px;margin-bottom:6px;opacity:.9}
+.header .nav li a:hover,
+.header .nav li a.active {
+  text-decoration: underline;
+}
+
+/* Hero */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  overflow: hidden;
+}
+
+.hero .slider {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.hero .track {
+  display: flex;
+  width: 300%;
+  animation: slide 20s infinite;
+}
+
+.hero .slide {
+  min-width: 100%;
+  height: 350px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.hero .overlay {
+  background: rgba(0,0,0,0.5);
+  color: white;
+  padding: 20px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+@keyframes slide {
+  0% { transform: translateX(0%); }
+  33% { transform: translateX(-100%); }
+  66% { transform: translateX(-200%); }
+  100% { transform: translateX(0%); }
+}
+
+/* Secciones */
+.section {
+  padding: 100px;
+  text-align: center;
+}
+
+.section h2 {
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+  color: #0a3d62;
+}
+
+.section p {
+  margin-bottom: 20px;
+}
+
+/* Grid */
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.card {
+  flex: 1 1 200px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Tablas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+table th, table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+table th {
+  background: #f4f4f4;
+}
+
+table td {
+  background: #fff;
+}
+
+/* Botones en tablas */
+button, .acciones a {
+  padding: 6px 12px;
+  margin: 2px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+button {
+  background: #007bff;
+  color: white;
+}
+
+button:hover {
+  background: #0056b3;
+}
+
+.acciones a {
+  color: #dc3545;
+  text-decoration: none;
+}
+
+.acciones a:hover {
+  text-decoration: underline;
+}
+
+/* Modal general */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 25px 30px;
+  border-radius: 10px;
+  width: 500px;
+  max-width: 90%;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+/* Botón cerrar modal */
+.cerrar {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #333;
+}
+
+.cerrar:hover {
+  color: red;
+}
+
+/* Formularios dentro del modal */
+#contenidoForm form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+#contenidoForm label {
+  font-weight: bold;
+  text-align: left;
+}
+
+#contenidoForm input,
+#contenidoForm select,
+#contenidoForm textarea {
+  width: 100%;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+#contenidoForm button {
+  align-self: flex-end;
+  padding: 8px 16px;
+  border: none;
+  background: #007bff;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#contenidoForm button:hover {
+  background: #0056b3;
+}
+
+/* Footer */
+.footer {
+  background: #0a3d62;
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+  margin-top: 40px;
+}
+
+
+/* Forzar formularios en modal a verse en columna */
+#contenidoForm form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  text-align: left;
+}
+
+#contenidoForm label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+#contenidoForm input,
+#contenidoForm select,
+#contenidoForm textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+#contenidoForm button {
+  background: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  align-self: flex-end;
+}
+
+#contenidoForm button:hover {
+  background: #0056b3;
+}
+
+ /* Estilos para el formulario dentro del modal */
+#contenidoForm form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+#contenidoForm .form-group {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+#contenidoForm label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+#contenidoForm input,
+#contenidoForm textarea,
+#contenidoForm select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+#contenidoForm .form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+#contenidoForm button {
+  background: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#contenidoForm button:hover {
+  background: #0056b3;
+}
+
+/* FORMULARIO DE EDICIÓN */
+.form-editar {
+  max-width: 500px;
+  margin: 0 auto;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.form-editar .form-group {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-editar .form-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.form-editar input,
+.form-editar textarea,
+.form-editar select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.form-inline {
+  display: flex;
+  gap: 15px;
+}
+
+.form-actions {
+  text-align: right;
+}
+
+.form-actions button {
+  background: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.form-actions button:hover {
+  background: #0056b3;
+}
+
+/* Contenedor del formulario (cubo) */
+.form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.form-editar {
+  width: 100%;
+  max-width: 500px;
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+  border: 1px solid #ddd;
+}
+
+.form-editar h3 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.form-editar .form-group {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-editar label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.form-editar input,
+.form-editar textarea,
+.form-editar select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 100%;
+}
+
+/* Center the action button specifically for the editar form */
+.form-editar .form-actions {
+  text-align: center;
+}
+
+.form-editar .form-actions button {
+  display: inline-block;
+  margin: 0 auto;
+}
+
+.form-inline {
+  display: flex;
+  gap: 15px;
+}
+
+.form-actions {
+  text-align: right;
+}
+
+.form-actions button {
+  background: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s ease;
+  text-align: center;
+}
+
+.form-actions button:hover {
+  background: #0056b3;
+}
 
 /* Contact */
 .footer{background:var(--blue-800);color:#dfeaf7;text-align:center;padding:26px;margin-top:28px}
 .footer a{color:#fff;text-decoration:none;font-weight:600}
 .footer a:hover{text-decoration:underline}
 
-@keyframes slide{
-  0%,30%{transform:translateX(0)}
-  35%,65%{transform:translateX(-100%)}
-  70%,100%{transform:translateX(-200%)}
-}
-
-/* Responsive */
-@media (max-width: 900px){
-  .grid{grid-template-columns:repeat(2,1fr)}
-  .overlay h1{font-size:28px}
-}
-@media (max-width: 560px){
-  .grid{grid-template-columns:1fr}
-  .overlay{margin:0 16px}
-  .header{flex-direction:column;gap:10px;align-items:flex-start}
-}
-
-/* ===== Login Page ===== */
-.login-container {
-  max-width: 400px;
-  margin: 60px auto;
-  background: var(--card);
-  padding: 32px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-}
-
-.login-container h2 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: var(--blue-900);
-  font-weight: 700;
-}
-
-.login-container label {
-  font-weight: 600;
-  color: var(--text);
-}
-
-.login-container input {
-  width: 100%;
-  padding: 10px;
-  margin: 6px 0 16px;
-  border: 1px solid #cbd6e2;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.login-container button {
-  width: 100%;
-  background: var(--blue-800);
-  color: #fff;
-  border: none;
-  padding: 12px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background .3s ease;
-}
-
-.login-container button:hover {
-  background: var(--blue-600);
-}
-
-.radio-group {
-  display: flex;
-  gap: 16px;
-  margin: 12px 0 18px;
-}
-
-.radio-group label {
-  background: #f3f7fb;
-  border: 1px solid #cbd6e2;
-  border-radius: 8px;
-  padding: 10px 16px;
-  cursor: pointer;
-  transition: 0.3s;
-  font-weight: 600;
-}
-
-.radio-group input[type="radio"] {
-  display: none; /* ocultamos el radio original */
-}
-
-.radio-group input[type="radio"]:checked + label {
-  background: var(--blue-800);
-  color: #fff;
-  border-color: var(--blue-600);
-}
-
-.big-select {
-  width: 100%;
-  padding: 18px 22px;          /* más padding = más grande */
-  margin: 12px 0 20px;
-  
-  border: 2px solid #cbd6e2;
-  border-radius: 12px;
-
-  font-size: 18px;             /* texto grande */
-  font-weight: 600;
-  background-color: #fff;
-  color: var(--text);
-  cursor: pointer;
-  transition: 0.3s;
-
-  background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='32' viewBox='0 0 24 24' width='32' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 18px center;
-  background-size: 24px;       /* flecha más grande */
-}
-
-.big-select:focus {
-  outline: none;
-  border-color: var(--blue-600);
-  box-shadow: 0 0 0 3px rgba(42,102,165,0.2);
-}
-
-
-html,body {
-  margin:0;
-  padding:0;
-}
-
-body {
-  font-family:'Inter',system-ui,Arial,Helvetica,sans-serif;
-  color:var(--text);
-  background:var(--bg);
-
 /* Sticky footer using flexbox: keep footer at the bottom when content is short */
-html, body { height: 100%; }
-body { display: flex; flex-direction: column; min-height: 100vh; }
-/* Push footer down */
-.footer { margin-top: auto; }
-}
-
-/* 👇 Esto es lo nuevo, separado */
 html, body {
   height: 100%;
+}
+body {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
+}
+/* Empuja el footer al fondo */
+.footer {
+  margin-top: auto; /* asegura que el footer quede abajo */
 }
 
-main {
-  flex: 1;
-}
-
-
-/* Estilo general del modal */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background: rgba(0,0,0,0.5);
-  padding-top: 60px;
-}
-
-.modal-content {
-  background: #fff;
-  margin: auto;
-  padding: 30px;
-  border-radius: 12px;
-  width: 40%;
-  max-width: 600px;
-  min-width: 350px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-/* Animación suave */
-@keyframes fadeIn {
-  from {opacity: 0; transform: scale(0.95);}
-  to {opacity: 1; transform: scale(1);}
-}
-
-.cerrar {
-  float: right;
-  font-size: 24px;
-  font-weight: bold;
-  cursor: pointer;
-  color: #555;
-}
-.cerrar:hover { color: red; }
-
-/* Estilos del formulario */
-.modal-content form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.modal-content label {
-  font-weight: bold;
-  margin-bottom: 5px;
-  color: #333;
-}
-
-.modal-content input,
-.modal-content select,
-.modal-content textarea {
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.modal-content button {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background 0.3s ease;
-}
-
-.modal-content button:hover {
-  background: #0056b3;
-}
+/* Si prefieres un footer siempre visible (no recomendado si tapa contenido), usa: */
+/* .footer { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000; } */

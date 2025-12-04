@@ -5,64 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portal de Prácticas TI – Empresas</title>
-  <link rel="stylesheet" href="{% static 'portal/style1.css' %}?v=16">
-
-  <style>
-#publicar-anuncio {
-  background: #f9fafc;
-  padding: 40px;
-  border-radius: 10px;
-  margin-top: 30px;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.form-grid div {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-grid label {
-  font-weight: 600;
-  margin-bottom: 5px;
-}
-
-.form-grid input,
-.form-grid textarea,
-.form-grid select {
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 8px;
-  font-size: 15px;
-  width: 100%;
-}
-
-textarea {
-  resize: none;
-  overflow-y: hidden;
-  min-height: 80px;
-  transition: height 0.2s ease;
-}
-
-.btn-publicar {
-  background: #004aad;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  font-size: 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 20px;
-}
-
-.btn-publicar:hover {
-  background: #003b8a;
-}
-  </style>
+  <link rel="stylesheet" href="{% static 'portal/css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'portal/css/empresas.css' %}">
 </head>
 <body>
 
