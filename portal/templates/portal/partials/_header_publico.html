@@ -2,49 +2,51 @@
 <header class="header">
   <div class="brand">Portal de Prácticas TI</div>
   
-  <!-- Menú hamburguesa (móvil) -->
+  <!-- Botón hamburguesa para móvil -->
   <button class="hamburger" id="hamburger" aria-label="Menú">
     <span></span>
     <span></span>
     <span></span>
   </button>
-
-  <!-- Navegación -->
-  <ul class="nav" id="nav">
-    <li><a href="{% url 'index' %}">Inicio</a></li>
-    <li><a href="{% url 'login' %}">Login</a></li>
-    <li><a href="{% url 'registro' %}">Registro</a></li>
-  </ul>
+  
+  <div class="nav-wrapper" id="navWrapper">
+    <ul class="nav">
+      <li><a href="{% url 'index' %}">Inicio</a></li>
+      <li><a href="{% url 'login' %}">Login</a></li>
+      <li><a href="{% url 'registro' %}">Registro</a></li>
+    </ul>
+  </div>
 </header>
 
 <script>
-  // Toggle menú hamburguesa
   (function() {
     const hamburger = document.getElementById('hamburger');
-    const nav = document.getElementById('nav');
-    
-    if (hamburger && nav) {
-      hamburger.addEventListener('click', function(e) {
+    const navWrapper = document.getElementById('navWrapper');
+
+    if (hamburger && navWrapper) {
+      hamburger.addEventListener('click', (e) => {
         e.stopPropagation();
         hamburger.classList.toggle('active');
-        nav.classList.toggle('active');
+        navWrapper.classList.toggle('active');
       });
 
-      // Cerrar al hacer click fuera
-      document.addEventListener('click', function(e) {
-        if (!nav.contains(e.target) && !hamburger.contains(e.target)) {
-          hamburger.classList.remove('active');
-          nav.classList.remove('active');
-        }
-      });
-
-      // Cerrar al hacer click en un enlace
-      const navLinks = nav.querySelectorAll('a');
+      // Cerrar menú al hacer clic en un enlace
+      const navLinks = document.querySelectorAll('.nav a');
       navLinks.forEach(link => {
-        link.addEventListener('click', function() {
+        link.addEventListener('click', () => {
           hamburger.classList.remove('active');
-          nav.classList.remove('active');
+          navWrapper.classList.remove('active');
         });
+      });
+
+      // Cerrar menú al hacer clic fuera
+      document.addEventListener('click', (e) => {
+        if (navWrapper.classList.contains('active') && 
+            !navWrapper.contains(e.target) && 
+            !hamburger.contains(e.target)) {
+          hamburger.classList.remove('active');
+          navWrapper.classList.remove('active');
+        }
       });
     }
   })();

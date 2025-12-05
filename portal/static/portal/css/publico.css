@@ -84,13 +84,18 @@
 
 /* ===== LOGIN / REGISTRO ===== */
 .login-container {
-  max-width: none;
-  width: 550px;
+  max-width: 550px;
+  width: 100%;
   margin: 40px auto;
   background: var(--card);
-  padding: 10px 50px;
+  padding: 30px 50px;
   border-radius: 12px;
   box-shadow: 0 6px 20px rgba(30, 64, 175, 0.15);
+}
+
+/* Registro ligeramente más ancho */
+.login-container.registro-container {
+  max-width: 650px;
 }
 
 .login-container h2 {
@@ -188,6 +193,39 @@
 }
 
 /* ===== RESPONSIVE ===== */
+
+/* Tablet y pantallas medianas */
+@media (max-width: 900px) {
+  .hero {
+    max-width: 100%;
+    padding: 0 20px;
+  }
+
+  .slider {
+    height: 380px;
+  }
+
+  .overlay {
+    margin-left: 30px;
+    padding: 20px 24px;
+  }
+
+  .overlay h1 {
+    font-size: 30px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .login-container {
+    width: 95%;
+    padding: 30px 25px;
+  }
+}
+
+/* Móvil */
 @media (max-width: 768px) {
   .hero {
     padding: 0 15px;
@@ -195,35 +233,85 @@
   }
 
   .slider {
-    height: 350px;
+    height: 300px;
+    border-radius: 12px;
   }
 
   .overlay {
-    margin: 0 20px;
-    padding: 20px;
+    margin-left: 15px;
+    padding: 16px 18px;
+    max-width: calc(100% - 30px);
   }
 
   .overlay h1 {
     font-size: 24px;
+    margin-bottom: 6px;
   }
 
   .overlay p {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .grid {
     grid-template-columns: 1fr;
     gap: 15px;
   }
+
+  /* Login y Registro responsive */
+  .login-container {
+    width: calc(100% - 30px);
+    margin: 20px auto;
+    padding: 25px 20px;
+    border-radius: 10px;
+  }
+
+  .login-container.registro-container {
+    max-width: 650px !important;
+    min-width: 305px !important;
+  }
+
+  .login-container h2 {
+    font-size: 22px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+  }
+
+  .login-container label {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+
+  .login-container input,
+  .login-container select {
+    padding: 11px 12px;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .login-container button {
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  .login-container form {
+    gap: 6px;
+  }
+
+  .radio-group {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 }
 
-@media (max-width: 560px) {
+/* Móvil pequeño */
+@media (max-width: 480px) {
   .slider {
-    height: 300px;
+    height: 280px;
   }
 
   .overlay {
-    margin: 0 16px;
+    margin-left: 10px;
+    padding: 14px 16px;
   }
 
   .overlay h1 {
@@ -231,16 +319,27 @@
   }
 
   .overlay p {
+    font-size: 12px;
+  }
+
+  .login-container {
+    width: calc(100% - 16px);
+    padding: 20px 10px;
+    margin: 15px auto;
+  }
+
+  .login-container h2 {
+    font-size: 20px;
+  }
+
+  .login-container input,
+  .login-container select {
+    padding: 10px;
     font-size: 13px;
   }
-}
 
-@media (max-width: 900px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .overlay h1 {
-    font-size: 28px;
+  .login-container button {
+    padding: 11px;
+    font-size: 14px;
   }
 }
