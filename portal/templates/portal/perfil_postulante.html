@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil Postulante</title>
+  <link rel="stylesheet" href="{% static 'portal/css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'portal/css/practicantes.css' %}">
+</head>
+<body>
+
+  {% include 'portal/partials/_header_alumno.html' %}
+
+  <section class="section">
+    {% if messages %}
+      <div style="max-width:900px;margin:0 auto 16px;">
+        {% for message in messages %}
+          {% if 'from_login' not in message.tags %}
+            <div class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}">{{ message }}</div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="form-container">
+      <h2>Perfil de Postulante</h2>
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+  <p style="margin-top:-8px;color:#6b7280;font-size:14px;"></p>
+        <button type="submit">Guardar cambios</button>
+      </form>
+
+      {% if form.instance.cv %}
+  <div style="margin-top:16px; display:flex; gap:10px; align-items:center;">
+    <strong>CV actual:</strong>
+
+    <!-- Ver en el navegador (si el visor puede abrirlo) -->
+    <a href="{% url 'ver_cv_propio' %}" target="_blank" rel="noopener"
+       style="padding:8px 14px; background:#2563eb; color:white; text-decoration:none; border-radius:6px;">
+      Ver CV
+    </a>
+
+    <!-- Descargar forzado (pasa por Django y usa enlace firmado / streaming) -->
+    <a href="{% url 'descargar_cv' %}"
+       style="padding:8px 14px; background:#16a34a; color:white; text-decoration:none; border-radius:6px;">
+      Descargar CV
+    </a>
+  </div>
+{% endif %}
+    </div>
+  </section>
+  {% include 'portal/partials/_footer.html' %}
+  <script>
+    // UI: permite solo números y una K/k al final (máximo 9 caracteres); reemplaza DV si se escribe un 10º carácter
+    (function(){
+      const rutInput = document.querySelector('input[name="rut"]');
+      if(!rutInput) return;
+      rutInput.addEventListener('input', () => {
+        let v = rutInput.value.toUpperCase().replace(/\s+/g, '');
+        v = v.replace(/[\.-]/g, '');
+        v = v.replace(/[^0-9K]/g, '');
+        if (v.length > 0) {
+          const kIndex = v.indexOf('K');
+          if (kIndex !== -1 && kIndex !== v.length - 1) {
+            v = v.replace(/K/g, '');
+          }
+        }
+        if (v.length > 9) {
+          const nuevoDV = v[v.length - 1];
+          v = v.slice(0, 8) + nuevoDV;
+        }
+        rutInput.value = v;
+      });
+    })();
+  </script>
+</body>
+</html>

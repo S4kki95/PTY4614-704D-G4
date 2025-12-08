@@ -1,0 +1,186 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+:root{
+  --blue-900:#0c3b66;
+  --blue-800:#174a7e;
+  --blue-600:#2a66a5;
+  --bg:#f3f7fb;
+  --text:#0f2c4d;
+  --muted:#5f7591;
+  --card:#ffffff;
+  --shadow:0 10px 25px rgba(16,53,89,.08);
+  --radius:16px;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;}
+/* Make body a column flex container so footer can be pushed to the bottom */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, Arial, Helvetica, sans-serif;
+  color: var(--text);
+  background: linear-gradient(135deg, #f3f7fb, #e6f0ff);
+}
+
+/* Header / Navbar */
+.header{
+  background:var(--blue-800);
+  color:#fff;
+  padding:18px 28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.brand{font-weight:800;font-size:22px;letter-spacing:.2px}
+.nav{list-style:none;display:flex;gap:24px;margin:0;padding:0}
+.nav a{color:#eaf2fb;text-decoration:none;font-weight:600;opacity:.95}
+.nav a:hover{opacity:1;text-decoration:underline}
+
+
+/* ===== Login Page ===== */
+.login-container {
+  max-width: 400px;
+  margin: 60px auto;
+  background: var(--card);
+  padding: 32px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.login-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--blue-900);
+  font-weight: 700;
+}
+
+.login-container label {
+  font-weight: 600;
+  color: var(--text);
+  display: block; /* fuerza a que el input/select quede abajo */
+  margin-bottom: 4px;
+}
+
+.login-container input,
+.login-container select {
+  width: 100%;
+  display: block; /* asegúrate de que el select no quede al lado del label */
+  padding: 10px;
+  margin: 6px 0 16px; /* mismo espaciado que los inputs */
+  border: 1px solid #cbd6e2;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.login-container button {
+  width: 100%;
+  background: var(--blue-800);
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .3s ease;
+}
+
+.login-container button:hover {
+  background: var(--blue-600);
+}
+
+/* Contact */
+.footer{background:var(--blue-800);color:#dfeaf7;text-align:center;padding:26px;margin-top:auto}
+.footer a{color:#fff;text-decoration:none;font-weight:600}
+.footer a:hover{text-decoration:underline}
+
+/* Estilos para el formulario de registro */
+.login-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* menos espacio entre campos */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* fuente para Windows */
+}
+
+.login-container label {
+  font-weight: 700; /* se mantiene más fuerte en sección registro */
+}
+
+.login-container input, .login-container select, .login-container textarea {
+  padding: 10px;
+  border: 1px solid #d0d7e0;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* Texto dentro de los campos (lo que el usuario escribe) */
+.login-container input,
+.login-container select,
+.login-container textarea {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 15px; /* un poco más grande */
+  color: #0f2c4d;
+}
+
+/* Forzar consistencia visual de .form-control (inputs y selects) */
+.form-control {
+  width: 100%;
+  display: block;
+  padding: 10px;
+  margin: 6px 0 16px;
+  border: 1px solid #cbd6e2;
+  border-radius: 8px;
+  font-size: 15px;
+  background-color: #fff;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--blue-600);
+  box-shadow: 0 0 0 3px rgba(42, 102, 165, 0.15);
+}
+
+/* Asegurar que el select de empresa se vea como el resto */
+#capacitador_empresa_field select,
+#capacitador_empresa_field .form-control {
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* Radio group (roles) */
+.radio-group {
+  display: flex;
+  gap: 10px; /* reducir separación entre opciones */
+  align-items: center;
+}
+
+.radio-group input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin: 0 4px 0 0;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+/* Campo empresa cuando aparece */
+#empresa_field {
+  margin-top: 6px;
+}
+
+/* Botón */
+.login-container button {
+  background: var(--blue-800);
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.error { color: #c0392b; font-size: 13px }

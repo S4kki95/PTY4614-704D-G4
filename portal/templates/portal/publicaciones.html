@@ -1,0 +1,214 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prácticas disponibles</title>
+  <link rel="stylesheet" href="{% static 'portal/css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'portal/css/practicantes.css' %}">
+</head>
+
+<body>
+
+{% include 'portal/partials/_header_alumno.html' %}
+
+<section class="section">
+  <h2 style="text-align:center; margin-top:0;">Prácticas disponibles</h2>
+
+  <form method="get" action="" style="max-width:1200px;margin:0 auto 16px;display:flex;gap:8px;align-items:center;">
+    <input type="text" name="q" value="{{ q|default:'' }}" placeholder="Buscar por título, empresa, ubicación..." style="flex:1 1 auto;padding:12px 14px;border:1px solid #cbd6e2;border-radius:8px;">
+    <button type="submit" class="btn-primary btn-icon" style="flex:0 0 auto;" aria-label="Buscar" title="Buscar">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </button>
+  </form>
+
+  {% if messages %}
+    <div style="max-width:900px;margin:0 auto 16px;">
+      {% for message in messages %}
+        {% if 'from_login' not in message.tags %}
+          <div style="padding:10px;border-radius:6px;margin-bottom:8px; {% if message.tags == 'error' %} background:#fee;color:#900;border:1px solid #f99; {% elif message.tags == 'success' %} background:#eefcee;color:#065f46;border:1px solid #a7f3d0; {% else %} background:#eef;border:1px solid #bbf; {% endif %}">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if publicaciones %}
+  <div class="contenedor">
+    <div class="lista-practicas">
+      {% for pub in publicaciones %}
+      <div class="practica-item" onclick="mostrarDetalle({{ pub.id }})">
+        <h3>{{ pub.titulo }}</h3>
+        <p>{{ pub.empresa.company_name|default:pub.empresa.username }} — {{ pub.creado_en|date:"d-m-Y" }}</p>
+        <small>{{ pub.ubicacion }} — {{ pub.modalidad|title }}</small><br>
+        <small>{{ pub.tipo_practica|title }}</small>
+      </div>
+      {% endfor %}
+
+      <!-- Paginación -->
+      {% if publicaciones.has_other_pages %}
+      <div class="pagination">
+        {% if publicaciones.has_previous %}
+          <a href="?page=1{% if q %}&q={{ q }}{% endif %}">Primera</a>
+          <a href="?page={{ publicaciones.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">Anterior</a>
+        {% else %}
+          <span class="disabled">Primera</span>
+          <span class="disabled">Anterior</span>
+        {% endif %}
+
+        <span class="page-info">Página {{ publicaciones.number }} de {{ publicaciones.paginator.num_pages }}</span>
+
+        {% if publicaciones.has_next %}
+          <a href="?page={{ publicaciones.next_page_number }}{% if q %}&q={{ q }}{% endif %}">Siguiente</a>
+          <a href="?page={{ publicaciones.paginator.num_pages }}{% if q %}&q={{ q }}{% endif %}">Última</a>
+        {% else %}
+          <span class="disabled">Siguiente</span>
+          <span class="disabled">Última</span>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div id="detallePractica" class="detalle-practica">
+      <p>Selecciona una práctica para ver los detalles.</p>
+    </div>
+  </div>
+  {% else %}
+    {% if q %}
+      <p>No se encontraron publicaciones para "{{ q }}".</p>
+    {% else %}
+      <p>No hay publicaciones disponibles por ahora.</p>
+    {% endif %}
+  {% endif %}
+</section>
+
+{% include 'portal/partials/_footer.html' %}
+
+<!-- Overlay para modal móvil -->
+<div class="modal-overlay" id="modalOverlay" onclick="cerrarModal()"></div>
+
+<!-- Modal bottom sheet para móvil -->
+<div class="modal-bottom" id="modalBottom">
+  <div class="modal-header">
+    <h3 id="modalTitle">Detalles de la práctica</h3>
+    <button class="modal-close" onclick="cerrarModal()" aria-label="Cerrar">×</button>
+  </div>
+  <div id="modalContent"></div>
+</div>
+
+<script>
+  const publicaciones = {{ publicaciones_json|safe }};
+  // Convertimos a Set para manejo más fácil, aunque array está bien
+  let postulaciones = {{ postulaciones|safe }}; 
+
+  function mostrarDetalle(id) {
+    const pub = publicaciones.find(p => p.id === id);
+    
+    // Detectar si es móvil
+    const isMobile = window.innerWidth <= 768;
+    
+    if (!pub) return;
+
+    const yaPostulado = postulaciones.includes(pub.id);
+
+    const contenidoHTML = `
+      <h3>${pub.titulo}</h3>
+      <p><strong>Empresa:</strong> ${pub.empresa}</p>
+      <p><strong>Ubicación:</strong> ${pub.ubicacion}</p>
+      <p><strong>Modalidad:</strong> ${pub.modalidad}</p>
+      <p><strong>Tipo de práctica:</strong> ${pub.tipo_practica}</p>
+      <p><strong>Duración:</strong> ${pub.duracion_meses} meses</p>
+      <p><strong>Jornada:</strong> ${pub.jornada}</p>
+      <p><strong>Requisitos:</strong> ${pub.requisitos}</p>
+      <p><strong>Descripción:</strong> ${pub.descripcion}</p>
+      <p><strong>Cupos disponibles:</strong> ${pub.cupos}</p>
+      <p><strong>Fecha publicación:</strong> ${pub.creado_en}</p>
+      <div id="accion-postular-${pub.id}">
+      ${
+        yaPostulado
+        ? '<button class="btn-disabled" disabled>Ya postulado</button>'
+        : `<button onclick="postular(${pub.id})" class="btn-primary">Postular</button>`
+      }
+      </div>
+    `;
+
+    if (isMobile) {
+      // Mostrar modal en móvil
+      document.getElementById('modalContent').innerHTML = contenidoHTML;
+      document.getElementById('modalOverlay').classList.add('active');
+      document.getElementById('modalBottom').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Mostrar en el panel lateral en desktop
+      document.getElementById("detallePractica").innerHTML = contenidoHTML;
+    }
+  }
+
+  function postular(id) {
+    const contenedor = document.getElementById(`accion-postular-${id}`);
+    const btn = contenedor ? contenedor.querySelector('button') : null;
+    
+    if(btn) {
+        btn.disabled = true;
+        btn.textContent = "Enviando...";
+    }
+
+    fetch(`/portal/publicaciones/postular/${id}/`, {
+      method: 'GET',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar lista local de postulaciones
+        postulaciones.push(id);
+        
+        // Actualizar UI
+        if (contenedor) {
+            contenedor.innerHTML = '<button class="btn-disabled" disabled>Ya postulado</button>';
+        }
+        // Opcional: Mostrar notificación toast en lugar de alert
+        // alert(data.message);
+      } else {
+        alert(data.message);
+        if(btn) {
+            btn.disabled = false;
+            btn.textContent = "Postular";
+        }
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert("Ocurrió un error al procesar la solicitud.");
+      if(btn) {
+            btn.disabled = false;
+            btn.textContent = "Postular";
+        }
+    });
+  }
+
+  function cerrarModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+    document.getElementById('modalBottom').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // Auto-abrir detalle si viene un ID en la URL
+  window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+    if (id) {
+       mostrarDetalle(parseInt(id));
+    }
+  });
+</script>
+
+</body>
+</html>

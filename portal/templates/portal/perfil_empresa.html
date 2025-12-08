@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil Empresa</title>
+  <link rel="stylesheet" href="{% static 'portal/css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'portal/css/empresas.css' %}">
+</head>
+<body>
+
+  {% include 'portal/partials/_header_empresa.html' %}
+
+  <section class="section">
+    <div class="form-container">
+      <h2>Perfil de Empresa</h2>
+
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Guardar cambios</button>
+      </form>
+    </div>
+  </section>
+  {% include 'portal/partials/_footer.html' %}
+</body>
+</html>

@@ -1,0 +1,434 @@
+/* ===== PÁGINAS PÚBLICAS (INDEX, LOGIN, REGISTRO) ===== */
+
+/* Hero / Carousel */
+.hero {
+  max-width: 1100px;
+  margin: 24px auto 0;
+  padding: 0 24px;
+}
+
+.slider {
+  position: relative;
+  min-height: 420px;
+  height: auto;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.track {
+  display: flex;
+  width: 300%;
+  height: 100%;
+  animation: slide 18s infinite;
+}
+
+.slide {
+  min-width: 100%;
+  min-height: 420px;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background-position: center;
+  background-size: cover;
+}
+
+.hero .slider .overlay {
+  margin-left: 48px;
+  margin-right: 48px;
+  max-width: 640px;
+  background: rgba(10,34,61,.55);
+  color: #fff;
+  padding: 24px 28px;
+  border-radius: 14px;
+  backdrop-filter: blur(2px);
+  box-sizing: border-box;
+  height: auto;
+  min-height: auto;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  display: block;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.hero .slider .overlay h1 {
+  margin: 0 0 8px;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  font-size: 36px;
+  line-height: 1.15;
+  font-weight: 800;
+  display: block;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.hero .slider .overlay p {
+  margin: 0;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  font-size: 16px;
+  opacity: .95;
+  display: block;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+@keyframes slide {
+  0%, 30% {
+    transform: translateX(0);
+  }
+  35%, 65% {
+    transform: translateX(-100%);
+  }
+  70%, 100% {
+    transform: translateX(-200%);
+  }
+}
+
+/* Grid de cards en index */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-top: 8px;
+}
+
+.icon {
+  width: 38px;
+  height: 38px;
+  margin-bottom: 6px;
+  opacity: .9;
+}
+
+/* ===== LOGIN / REGISTRO ===== */
+.login-container {
+  max-width: 550px;
+  width: 100%;
+  margin: 40px auto;
+  background: var(--card);
+  padding: 30px 50px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(30, 64, 175, 0.15);
+}
+
+/* Registro ligeramente más ancho */
+.login-container.registro-container {
+  max-width: 650px;
+}
+
+.login-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--blue-600);
+  color: var(--blue-900);
+  font-weight: 700;
+  font-size: 26px;
+}
+
+.login-container label {
+  font-weight: 600;
+  color: var(--text);
+  display: block;
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+.login-container input,
+.login-container select {
+  width: 100%;
+  display: block;
+  padding: 12px 14px;
+  margin: 0 0 10px;
+  border: 1.5px solid #cbd6e2;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #0f2c4d;
+  transition: border-color 0.2s ease;
+}
+
+.login-container input:focus,
+.login-container select:focus {
+  outline: none;
+  border-color: var(--blue-600);
+  box-shadow: 0 0 0 3px rgba(42, 102, 165, 0.15);
+}
+
+.login-container button {
+  width: 100%;
+  background: var(--blue-800);
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background .3s ease;
+  margin-top: 4px;
+}
+
+.login-container button:hover {
+  background: var(--blue-600);
+}
+
+.login-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Radio group (roles) */
+.radio-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.radio-group input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin: 0 4px 0 0;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+/* Campo empresa cuando aparece */
+#empresa_field, #capacitador_empresa_field {
+  margin-top: 6px;
+}
+
+.error {
+  color: #c0392b;
+  font-size: 13px;
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* Tablet y pantallas medianas */
+@media (max-width: 900px) {
+  .hero {
+    max-width: 100%;
+    padding: 0 20px;
+  }
+
+  .slider {
+    height: 380px;
+  }
+
+  .overlay {
+    margin-left: 15px !important;
+    margin-right: 15px !important;
+    padding: 18px 20px !important;
+    max-width: calc(100% - 30px) !important;
+    width: auto !important;
+  }
+
+  .overlay h1 {
+    font-size: 24px;
+    line-height: 1.2;
+    word-wrap: break-word;
+  }
+
+  .overlay p {
+    font-size: 14px;
+    line-height: 1.4;
+    word-wrap: break-word;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .login-container {
+    width: 95%;
+    padding: 30px 25px;
+  }
+}
+
+/* Móvil */
+@media (max-width: 768px) {
+  .hero {
+    padding: 0 15px;
+    margin-top: 20px;
+  }
+
+  .slider {
+    min-height: 300px;
+    height: auto;
+    border-radius: 12px;
+  }
+
+  .slide {
+    min-height: 300px;
+    height: auto;
+    overflow: visible;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero .slider .overlay {
+    margin: 10px !important;
+    padding: 8px 10px !important;
+    max-width: calc(100% - 20px) !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero .slider .overlay h1 {
+    margin-bottom: 8px !important;
+    line-height: 1.3 !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+    max-height: none !important;
+    font-size: 20px !important;
+  }
+
+  .hero .slider .overlay p {
+    line-height: 1.4 !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    margin: 0 !important;
+    white-space: normal !important;
+    max-height: none !important;
+    font-size: 13px !important;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  /* Login y Registro responsive */
+  .login-container {
+    width: calc(100% - 30px);
+    margin: 20px auto;
+    padding: 25px 20px;
+    border-radius: 10px;
+  }
+
+  .login-container.registro-container {
+    max-width: 650px !important;
+    min-width: 305px !important;
+  }
+
+  .login-container h2 {
+    font-size: 22px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+  }
+
+  .login-container label {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+
+  .login-container input,
+  .login-container select {
+    padding: 11px 12px;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .login-container button {
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  .login-container form {
+    gap: 6px;
+  }
+
+  .radio-group {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+/* Móvil pequeño */
+@media (max-width: 480px) {
+  .slider {
+    min-height: 280px;
+    height: auto;
+  }
+
+  .hero .slider .overlay {
+    margin: 10px !important;
+    padding: 12px 14px !important;
+    max-width: calc(100% - 20px) !important;
+  }
+
+  .hero .slider .overlay h1 {
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    margin-bottom: 5px !important;
+  }
+
+  .hero .slider .overlay p {
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+  }
+}
+
+/* Móvil muy pequeño */
+@media (max-width: 360px) {
+  .slider {
+    min-height: 260px;
+    height: auto;
+  }
+
+  .hero .slider .overlay {
+    margin: 8px !important;
+    padding: 10px 12px !important;
+    max-width: calc(100% - 16px) !important;
+  }
+
+  .hero .slider .overlay h1 {
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+  }
+
+  .hero .slider .overlay p {
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+  }
+
+  .login-container {
+    width: calc(100% - 16px);
+    padding: 20px 10px;
+    margin: 15px auto;
+  }
+
+  .login-container h2 {
+    font-size: 20px;
+  }
+
+  .login-container input,
+  .login-container select {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .login-container button {
+    padding: 11px;
+    font-size: 14px;
+  }
+}

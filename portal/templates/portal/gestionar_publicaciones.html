@@ -1,0 +1,255 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestionar Publicaciones</title>
+  <link rel="stylesheet" href="{% static 'portal/css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'portal/css/empresas.css' %}">
+</head>
+<body data-role="{{ user.role }}">
+
+{% include 'portal/partials/_header_empresa.html' %}
+
+  <section class="section section-wide">
+    <h2 style="text-align: center; margin-top: 0;">Gestionar Publicaciones</h2>
+    
+    <div class="gestion-container">
+    <!-- Sidebar izquierda -->
+    <div class="gestion-sidebar">
+      {% for anuncio in anuncios %}
+        <div class="anuncio-item" data-id="{{ anuncio.id }}">
+          <h4>{{ anuncio.titulo }}</h4>
+          <small>{{ anuncio.ubicacion }} — {{ anuncio.get_modalidad_display }}</small><br>
+          <small>{{ anuncio.tipo_practica|default:"Práctica profesional" }}</small>
+        </div>
+      {% empty %}
+        <p style="padding: 20px;">No tienes publicaciones aún.</p>
+      {% endfor %}
+      
+      {% if anuncios.has_other_pages %}
+      <div class="pagination">
+        {% if anuncios.has_previous %}
+          <a href="?page=1" class="page-link">‹‹ Primera</a>
+          <a href="?page={{ anuncios.previous_page_number }}" class="page-link">‹ Anterior</a>
+        {% endif %}
+        
+        <span class="page-current">
+          Página {{ anuncios.number }} de {{ anuncios.paginator.num_pages }}
+        </span>
+        
+        {% if anuncios.has_next %}
+          <a href="?page={{ anuncios.next_page_number }}" class="page-link">Siguiente ›</a>
+          <a href="?page={{ anuncios.paginator.num_pages }}" class="page-link">Última ››</a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Panel derecho -->
+    <div class="gestion-detalle" id="detalle">
+      {% if user.role == 'capacitador' %}
+        <div style="background:#eef;color:#224;border:1px solid #bbf;padding:12px;border-radius:8px;">
+          Vista de solo lectura para capacitadores. No puedes editar ni eliminar publicaciones.
+        </div>
+      {% endif %}
+      <p>Selecciona una publicación para ver sus detalles.</p>
+    </div>
+    </div>
+  </section>
+
+  <!-- Overlay para modal móvil -->
+  <div class="modal-overlay-custom" id="modalOverlay"></div>
+
+  <!-- Modal bottom sheet para móvil -->
+  <div class="modal-bottom" id="modalBottom">
+    <div class="modal-header-custom">
+      <h3>Editar Publicación</h3>
+      <button class="modal-close-custom" aria-label="Cerrar">×</button>
+    </div>
+    <div id="modalContentGestion"></div>
+  </div>
+
+  {% include 'portal/partials/_footer.html' %}
+
+  <script>
+  const IS_CAPACITADOR = (document.body.dataset.role === 'capacitador');
+  
+  // Delegación de eventos para cargar detalle
+  document.addEventListener('click', (e) => {
+    const item = e.target.closest('.anuncio-item');
+    if (item && item.dataset.id) {
+      const id = item.dataset.id;
+      
+      // Marcar item como activo
+      document.querySelectorAll('.anuncio-item').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+      
+      mostrarDetalle(id);
+    }
+  });
+
+  function mostrarDetalle(id) {
+    const isMobile = window.innerWidth <= 768;
+    
+    fetch(`/portal/editar_publicacion/${id}/`, {
+      headers: {"X-Requested-With": "XMLHttpRequest"}
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (!data.success) {
+        const htmlContent = data.html_form;
+        
+        if (isMobile) {
+          // Mostrar en modal móvil
+          const modalContent = document.getElementById('modalContentGestion');
+          const modalOverlay = document.getElementById('modalOverlay');
+          const modalBottom = document.getElementById('modalBottom');
+          
+          if (modalContent) {
+            modalContent.innerHTML = htmlContent;
+          }
+          if (modalOverlay) {
+            modalOverlay.classList.add('active');
+          }
+          if (modalBottom) {
+            modalBottom.classList.add('active');
+          }
+          
+          // Si es capacitador, deshabilitar inputs en el modal
+          if (IS_CAPACITADOR) {
+            modalContent.querySelectorAll('input, textarea, select, button[type="submit"]').forEach(el => {
+              el.setAttribute('disabled', 'disabled');
+            });
+          }
+          
+          // Configurar formulario en modal
+          setupForm(modalContent.querySelector('form'));
+        } else {
+          // Mostrar en panel desktop
+          document.getElementById("detalle").innerHTML = htmlContent;
+          
+          // Si es capacitador, deshabilitar inputs
+          if (IS_CAPACITADOR) {
+            const container = document.getElementById("detalle");
+            container.querySelectorAll('input, textarea, select, button[type="submit"]').forEach(el => {
+              el.setAttribute('disabled', 'disabled');
+            });
+          }
+          
+          // Configurar formulario en desktop
+          setupForm(document.querySelector("#detalle form"));
+        }
+      }
+    });
+  }
+
+  function setupForm(form) {
+    if (!form) return;
+    
+    form.onsubmit = function(e) {
+      // Bloquear envío en capacitador (solo lectura)
+      if (IS_CAPACITADOR) {
+        e.preventDefault();
+        return false;
+      }
+      
+      e.preventDefault();
+      fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),
+        headers: {"X-Requested-With": "XMLHttpRequest"}
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Actualizar el item en la lista lateral
+          const item = document.querySelector(`.anuncio-item[data-id="${data.id}"]`);
+          if (item) {
+            item.querySelector('h4').textContent = data.titulo;
+            item.querySelector('small').innerHTML = `${data.ubicacion} — ${data.modalidad}<br>${data.tipo_practica}`;
+          }
+          
+          // Mostrar mensaje de éxito (opcional: usar un toast o alerta)
+          // alert("Publicación actualizada correctamente.");
+          
+          // Cerrar modal si es móvil
+          if (window.innerWidth <= 768) {
+            cerrarModalGestion();
+          }
+        } else {
+          const isMobile = window.innerWidth <= 768;
+          if (isMobile) {
+            document.getElementById('modalContentGestion').innerHTML = data.html_form;
+            setupForm(document.querySelector('#modalContentGestion form'));
+          } else {
+            document.getElementById("detalle").innerHTML = data.html_form;
+            setupForm(document.querySelector("#detalle form"));
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert("Ocurrió un error al guardar los cambios.");
+      });
+    };
+  }
+
+  // Auto-ajustar textareas
+  document.addEventListener("input", function(e) {
+    if (e.target.tagName.toLowerCase() === "textarea") {
+      e.target.style.height = "auto";
+      e.target.style.height = (e.target.scrollHeight) + "px";
+    }
+  });
+
+  window.addEventListener("load", () => {
+    document.querySelectorAll("textarea").forEach(t => {
+      t.style.height = "auto";
+      t.style.height = (t.scrollHeight) + "px";
+    });
+  });
+
+  // Auto-ajustar textareas
+  document.addEventListener("input", function(e) {
+    if (e.target.tagName.toLowerCase() === "textarea") {
+      e.target.style.height = "auto";
+      e.target.style.height = (e.target.scrollHeight) + "px";
+    }
+  });
+
+  window.addEventListener("load", () => {
+    document.querySelectorAll("textarea").forEach(t => {
+      t.style.height = "auto";
+      t.style.height = (t.scrollHeight) + "px";
+    });
+  });
+
+  // Cerrar modal
+  function cerrarModalGestion() {
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalBottom = document.getElementById('modalBottom');
+    if (modalOverlay && modalBottom) {
+      modalOverlay.classList.remove('active');
+      modalBottom.classList.remove('active');
+    }
+  }
+
+  // Event listeners para cerrar modal
+  document.addEventListener('DOMContentLoaded', function() {
+    const modalOverlay = document.getElementById('modalOverlay');
+    if (modalOverlay) {
+      modalOverlay.addEventListener('click', cerrarModalGestion);
+    }
+    
+    const closeBtn = document.querySelector('.modal-close-custom');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', cerrarModalGestion);
+    }
+  });
+  </script>
+
+</body>
+</html>
+</html>

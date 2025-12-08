@@ -1,0 +1,676 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Analytics - Admin</title>
+  <link rel="stylesheet" href="{% static 'portal/css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'portal/css/admin.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<header class="header">
+  <div class="brand">Panel Admin • Analytics</div>
+  <ul class="nav">
+    <li><a href="{% url 'index' %}">Inicio</a></li>
+    <li><a href="{% url 'admin_analytics' %}" class="active">Analytics</a></li>
+    <li><a href="{% url 'logout' %}">Salir</a></li>
+  </ul>
+</header>
+<section class="section">
+  <h2>Filtros</h2>
+  <form method="get" class="form-grid" style="grid-template-columns:repeat(5,1fr);gap:8px;align-items:end">
+    <div>
+      <label>Desde</label>
+      <input type="date" name="start" value="{{ filters.start }}" />
+    </div>
+    <div>
+      <label>Hasta</label>
+      <input type="date" name="end" value="{{ filters.end }}" />
+    </div>
+    <div>
+      <label>Institución</label>
+      <select name="institucion">
+        <option value="">Todas</option>
+        {% for i in instituciones %}
+          <option value="{{ i }}" {% if filters.institucion == i %}selected{% endif %}>{{ i }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Tipo práctica</label>
+      <select name="tipo_practica">
+        <option value="">Todas</option>
+        {% for t in tipos %}
+          <option value="{{ t }}" {% if filters.tipo == t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Estado</label>
+      <select name="estado">
+        <option value="">Todos</option>
+        <option value="pendiente" {% if filters.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+        <option value="aceptado" {% if filters.estado == 'aceptado' %}selected{% endif %}>Aceptado</option>
+        <option value="rechazado" {% if filters.estado == 'rechazado' %}selected{% endif %}>Rechazado</option>
+      </select>
+    </div>
+    <div style="grid-column:1/-1">
+      <button class="btn btn-primary" type="submit">Aplicar</button>
+    </div>
+  </form>
+
+  <div class="kpis">
+    <div class="kpi"><div>Total postulaciones</div><div style="font-size:28px;font-weight:700">{{ kpis.total_postulaciones }}</div></div>
+    <div class="kpi"><div>Aceptadas</div><div style="font-size:28px;font-weight:700;color:#16a34a">{{ kpis.total_aceptadas }}</div></div>
+    <div class="kpi"><div>Rechazadas</div><div style="font-size:28px;font-weight:700;color:#dc2626">{{ kpis.total_rechazadas }}</div></div>
+    <div class="kpi"><div>Total Anuncios</div><div style="font-size:28px;font-weight:700;color:#2563eb">{{ kpis.total_anuncios }}</div></div>
+    <div class="kpi"><div>Total Alumnos</div><div style="font-size:28px;font-weight:700;color:#4f46e5">{{ kpis.total_alumnos }}</div></div>
+    <div class="kpi"><div>Total Empresas</div><div style="font-size:28px;font-weight:700;color:#0891b2">{{ kpis.total_empresas }}</div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Cuentas creadas por institución</h3>
+      <canvas id="chartCuentas"></canvas>
+    </div>
+    <div class="card">
+      <h3>Postulaciones por institución</h3>
+      <canvas id="chartPosts"></canvas>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="card">
+      <h3>Rechazos por institución</h3>
+      <canvas id="chartRechazos"></canvas>
+    </div>
+    <div class="card">
+      <h3>Postulaciones por tipo de práctica</h3>
+      <canvas id="chartTipos"></canvas>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="card">
+      <h3>Postulaciones por Modalidad</h3>
+      <canvas id="chartModalidad"></canvas>
+    </div>
+    <div class="card">
+      <h3>Top 5 Empresas más solicitadas</h3>
+      <canvas id="chartTopEmpresas"></canvas>
+    </div>
+  </div>
+  
+  <div class="grid2" style="margin-top:16px">
+    <div class="card">
+      <h3>Distribución de Usuarios por Rol</h3>
+      <canvas id="chartRoles"></canvas>
+    </div>
+  </div>
+
+  <h2 style="margin-top:24px">Empresas y Capacitadores</h2>
+  <div class="card" id="empresas-container">
+    {% for item in empresas_con_capacitadores %}
+      <div class="empresa-item" data-empresa-id="{{ item.empresa.id }}" style="margin-bottom:24px;padding:16px;background:#f9fafb;border-radius:8px">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px">
+          <div>
+            <h3 style="margin:0;color:#1e40af">
+              🏢 {{ item.empresa.email }}
+              {% if item.empresa.company_name %}({{ item.empresa.company_name }}){% endif %}
+            </h3>
+            <p class="empresa-status-{{ item.empresa.id }}" style="margin:4px 0;color:#64748b;font-size:14px">
+              Registrado: {{ item.empresa.date_joined|date:'d-m-Y' }} • 
+              Estado cuenta: {% if item.empresa.is_active %}<span style="color:#16a34a">✓ Activa</span>{% else %}<span style="color:#dc2626">✗ Inactiva</span>{% endif %} •
+              Acceso: <span class="acceso-text">{% if item.empresa.habilitado %}<span style="color:#16a34a">✓ Habilitado</span>{% else %}<span style="color:#dc2626">✗ Deshabilitado</span>{% endif %}</span>
+            </p>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-habilitar" data-user-id="{{ item.empresa.id }}" data-habilitado="{{ item.empresa.habilitado|yesno:'true,false' }}" 
+                    style="background:{% if item.empresa.habilitado %}#dc2626{% else %}#16a34a{% endif %};color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px">
+              {% if item.empresa.habilitado %}🚫 Deshabilitar{% else %}✅ Habilitar{% endif %}
+            </button>
+            <button class="btn-eliminar" data-user-id="{{ item.empresa.id }}" data-email="{{ item.empresa.email }}" 
+                    style="background:#7c2d12;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:14px">
+              🗑️ Eliminar
+            </button>
+          </div>
+        </div>
+        
+        {% if item.capacitadores %}
+          <div style="margin-top:12px">
+            <p style="font-weight:600;margin-bottom:8px">👥 Capacitadores asociados ({{ item.capacitadores.count }}):</p>
+            <table style="background:#fff;margin-top:8px">
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Usuario</th>
+                  <th>Fecha registro</th>
+                  <th>Estado</th>
+                  <th>Acceso</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for cap in item.capacitadores %}
+                  <tr class="capacitador-row" data-cap-id="{{ cap.id }}" data-empresa-id="{{ item.empresa.id }}">
+                    <td>{{ cap.email }}</td>
+                    <td>{{ cap.username }}</td>
+                    <td>{{ cap.date_joined|date:'d-m-Y H:i' }}</td>
+                    <td class="cap-estado-{{ cap.id }}">
+                      {% if cap.is_active %}
+                        <span style="color:#16a34a">✓ Activo</span>
+                      {% else %}
+                        <span style="color:#dc2626">✗ Inactivo</span>
+                      {% endif %}
+                    </td>
+                    <td class="cap-acceso-{{ cap.id }}">
+                      {% if cap.habilitado %}
+                        <span style="color:#16a34a">✓ Habilitado</span>
+                      {% else %}
+                        <span style="color:#dc2626">✗ Deshabilitado</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <button class="btn-habilitar" data-user-id="{{ cap.id }}" data-habilitado="{{ cap.habilitado|yesno:'true,false' }}" 
+                              style="background:{% if cap.habilitado %}#dc2626{% else %}#16a34a{% endif %};color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:12px">
+                        {% if cap.habilitado %}Deshabilitar{% else %}Habilitar{% endif %}
+                      </button>
+                      <button class="btn-eliminar" data-user-id="{{ cap.id }}" data-email="{{ cap.email }}" 
+                              style="background:#7c2d12;color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:12px;margin-left:4px">
+                        🗑️
+                      </button>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p style="color:#64748b;font-style:italic;margin-top:8px">Sin capacitadores asociados</p>
+        {% endif %}
+      </div>
+    {% empty %}
+      <p class="muted">No hay empresas registradas.</p>
+    {% endfor %}
+  </div>
+
+  <h2 style="margin-top:24px">Logs recientes</h2>
+  
+  <!-- Filtros de Logs -->
+  <div class="card" style="margin-bottom:16px">
+    <form id="logs-filter-form" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;align-items:end">
+      <div>
+        <label for="log_tipo" style="display:block;margin-bottom:4px;font-weight:500;color:#334155">Tipo de Log:</label>
+        <select name="log_tipo" id="log_tipo" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px">
+          <option value="">Todos</option>
+          <option value="creada" {% if filters.log_tipo == 'creada' %}selected{% endif %}>Creada</option>
+          <option value="estado_cambiado" {% if filters.log_tipo == 'estado_cambiado' %}selected{% endif %}>Estado cambiado</option>
+        </select>
+      </div>
+      
+      <div>
+        <label for="log_estado" style="display:block;margin-bottom:4px;font-weight:500;color:#334155">Estado:</label>
+        <select name="log_estado" id="log_estado" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px">
+          <option value="">Todos</option>
+          <option value="pendiente" {% if filters.log_estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+          <option value="aceptado" {% if filters.log_estado == 'aceptado' %}selected{% endif %}>Aceptado</option>
+          <option value="rechazado" {% if filters.log_estado == 'rechazado' %}selected{% endif %}>Rechazado</option>
+        </select>
+      </div>
+      
+      <div>
+        <label for="log_institucion" style="display:block;margin-bottom:4px;font-weight:500;color:#334155">Institución:</label>
+        <select name="log_institucion" id="log_institucion" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px">
+          <option value="">Todas</option>
+          {% for inst in instituciones %}
+            <option value="{{ inst }}" {% if filters.log_institucion == inst %}selected{% endif %}>{{ inst }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div style="display:flex;gap:8px">
+        <button type="submit" style="padding:8px 16px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:500">
+          Filtrar
+        </button>
+        <button type="button" id="limpiar-filtros" style="padding:8px 16px;background:#e2e8f0;color:#334155;border:none;border-radius:6px;cursor:pointer;font-weight:500">
+          Limpiar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Tabla de Logs -->
+  <div class="card">
+    <table id="logs-table">
+      <thead>
+        <tr><th>Fecha</th><th>Acción</th><th>Postulación</th><th>Estado</th><th>Institución</th><th>Anuncio</th></tr>
+      </thead>
+      <tbody id="logs-tbody">
+        {% for log in logs_page %}
+          <tr>
+            <td>{{ log.creado_en|date:'d-m-Y H:i' }}</td>
+            <td>{{ log.get_accion_display }}</td>
+            <td>#{{ log.postulacion_id }}</td>
+            <td>{% if log.old_estado %}{{ log.old_estado }} → {% endif %}{{ log.new_estado }}</td>
+            <td>{{ log.institucion|default:'-' }}</td>
+            <td>{{ log.anuncio.titulo|default:'-' }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="muted">No hay registros para los filtros seleccionados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    
+    <!-- Paginación -->
+    <div id="logs-pagination" style="margin-top:16px;display:flex;justify-content:center;align-items:center;gap:8px">
+      {% if logs_page.has_other_pages %}
+        {% if logs_page.has_previous %}
+          <button class="pagination-btn" data-page="{{ logs_page.previous_page_number }}" 
+                  style="padding:6px 12px;background:#e2e8f0;color:#334155;border:none;border-radius:6px;cursor:pointer;font-weight:500">
+            ← Anterior
+          </button>
+        {% else %}
+          <span style="padding:6px 12px;background:#f1f5f9;color:#94a3b8;border-radius:6px;font-weight:500">
+            ← Anterior
+          </span>
+        {% endif %}
+        
+        <span id="page-info" style="padding:6px 12px;color:#475569;font-weight:500">
+          Página {{ logs_page.number }} de {{ logs_page.paginator.num_pages }}
+        </span>
+        
+        {% if logs_page.has_next %}
+          <button class="pagination-btn" data-page="{{ logs_page.next_page_number }}" 
+                  style="padding:6px 12px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:500">
+            Siguiente →
+          </button>
+        {% else %}
+          <span style="padding:6px 12px;background:#f1f5f9;color:#94a3b8;border-radius:6px;font-weight:500">
+            Siguiente →
+          </span>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% include 'portal/partials/_footer.html' %}
+
+{# Safer JSON embedding that won't break JS parsing and avoids XSS #}
+{{ cuentas_por_inst|json_script:"cuentas-data" }}
+{{ posts_por_inst|json_script:"posts-data" }}
+{{ rechazos_por_inst|json_script:"rechazos-data" }}
+{{ por_tipo|json_script:"tipos-data" }}
+{{ posts_por_modalidad|json_script:"modalidad-data" }}
+{{ top_empresas|json_script:"top-empresas-data" }}
+{{ usuarios_por_rol|json_script:"roles-data" }}
+
+<script>
+const cuentas = JSON.parse(document.getElementById('cuentas-data').textContent || '[]');
+const posts = JSON.parse(document.getElementById('posts-data').textContent || '[]');
+const rechazos = JSON.parse(document.getElementById('rechazos-data').textContent || '[]');
+const tipos = JSON.parse(document.getElementById('tipos-data').textContent || '[]');
+const modalidad = JSON.parse(document.getElementById('modalidad-data').textContent || '[]');
+const topEmpresas = JSON.parse(document.getElementById('top-empresas-data').textContent || '[]');
+const roles = JSON.parse(document.getElementById('roles-data').textContent || '[]');
+
+function bar(ctxId, labels, data, title, color='#2563eb'){
+  const ctx = document.getElementById(ctxId);
+  if (!ctx) return;
+  new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: title, data, backgroundColor: color }] },
+    options: { responsive:true, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
+  });
+}
+
+function pie(ctxId, labels, data, title){
+  const ctx = document.getElementById(ctxId);
+  if (!ctx) return;
+  new Chart(ctx, {
+    type: 'pie',
+    data: { 
+      labels, 
+      datasets: [{ 
+        label: title, 
+        data, 
+        backgroundColor: ['#2563eb', '#16a34a', '#dc2626', '#f59e0b', '#8b5cf6'] 
+      }] 
+    },
+    options: { responsive:true }
+  });
+}
+
+function capitalize(str) {
+  if (!str) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+bar('chartCuentas', cuentas.map(x=>capitalize(x.institucion_lower)||'N/D'), cuentas.map(x=>x.cantidad), 'Cuentas');
+bar('chartPosts', posts.map(x=>capitalize(x.inst_lower)||'N/D'), posts.map(x=>x.cantidad), 'Postulaciones');
+bar('chartRechazos', rechazos.map(x=>capitalize(x.inst_lower)||'N/D'), rechazos.map(x=>x.cantidad), 'Rechazos', '#dc2626');
+bar('chartTipos', tipos.map(x=>capitalize(x.tipo_lower)||'N/D'), tipos.map(x=>x.cantidad), 'Tipos', '#f59e0b');
+
+// Nuevos gráficos
+pie('chartModalidad', modalidad.map(x=>capitalize(x.mod_lower)||'N/D'), modalidad.map(x=>x.cantidad), 'Modalidad');
+bar('chartTopEmpresas', topEmpresas.map(x=>x.anuncio__empresa__company_name||x.anuncio__empresa__username||'N/D'), topEmpresas.map(x=>x.cantidad), 'Postulaciones', '#0891b2');
+pie('chartRoles', roles.map(x=>capitalize(x.role)||'N/D'), roles.map(x=>x.cantidad), 'Usuarios');
+
+// AJAX para filtros de logs
+(function() {
+  const form = document.getElementById('logs-filter-form');
+  const tbody = document.getElementById('logs-tbody');
+  const pagination = document.getElementById('logs-pagination');
+  const limpiarBtn = document.getElementById('limpiar-filtros');
+  
+  function loadLogs(page = 1) {
+    const formData = new FormData(form);
+    const params = new URLSearchParams(formData);
+    params.set('page', page);
+    
+    // Mostrar indicador de carga
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#64748b;padding:20px">Cargando...</td></tr>';
+    
+    fetch('/portal/admin/logs-ajax/?' + params.toString())
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#dc2626">Error: ' + data.error + '</td></tr>';
+          return;
+        }
+        
+        // Actualizar tabla
+        if (data.logs.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="muted" style="text-align:center;color:#64748b;font-style:italic">No hay registros para los filtros seleccionados.</td></tr>';
+        } else {
+          tbody.innerHTML = data.logs.map(log => {
+            const estado = log.old_estado ? log.old_estado + ' → ' + log.new_estado : log.new_estado;
+            return `
+              <tr>
+                <td>${log.fecha}</td>
+                <td>${log.accion}</td>
+                <td>#${log.postulacion_id}</td>
+                <td>${estado}</td>
+                <td>${log.institucion}</td>
+                <td>${log.anuncio}</td>
+              </tr>
+            `;
+          }).join('');
+        }
+        
+        // Actualizar paginación
+        updatePagination(data);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#dc2626">Error al cargar los logs</td></tr>';
+      });
+  }
+  
+  function updatePagination(data) {
+    if (data.total_pages <= 1) {
+      pagination.innerHTML = '';
+      return;
+    }
+    
+    let html = '';
+    
+    // Botón Anterior
+    if (data.has_previous) {
+      html += `<button class="pagination-btn" data-page="${data.previous_page}" 
+                      style="padding:6px 12px;background:#e2e8f0;color:#334155;border:none;border-radius:6px;cursor:pointer;font-weight:500">
+                ← Anterior
+              </button>`;
+    } else {
+      html += `<span style="padding:6px 12px;background:#f1f5f9;color:#94a3b8;border-radius:6px;font-weight:500">
+                ← Anterior
+              </span>`;
+    }
+    
+    // Info de página
+    html += `<span style="padding:6px 12px;color:#475569;font-weight:500">
+              Página ${data.current_page} de ${data.total_pages}
+            </span>`;
+    
+    // Botón Siguiente
+    if (data.has_next) {
+      html += `<button class="pagination-btn" data-page="${data.next_page}" 
+                      style="padding:6px 12px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:500">
+                Siguiente →
+              </button>`;
+    } else {
+      html += `<span style="padding:6px 12px;background:#f1f5f9;color:#94a3b8;border-radius:6px;font-weight:500">
+                Siguiente →
+              </span>`;
+    }
+    
+    pagination.innerHTML = html;
+    
+    // Agregar event listeners a los botones de paginación
+    pagination.querySelectorAll('.pagination-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const page = this.dataset.page;
+        loadLogs(page);
+        // Scroll suave a la tabla
+        document.getElementById('logs-table').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  }
+  
+  // Submit del formulario
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    loadLogs(1);
+  });
+  
+  // Cambio en selects (filtrar automáticamente)
+  form.querySelectorAll('select').forEach(select => {
+    select.addEventListener('change', function() {
+      loadLogs(1);
+    });
+  });
+  
+  // Limpiar filtros
+  limpiarBtn.addEventListener('click', function() {
+    form.reset();
+    loadLogs(1);
+  });
+  
+  // Event delegation para botones de paginación iniciales
+  pagination.querySelectorAll('.pagination-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const page = this.dataset.page;
+      loadLogs(page);
+      document.getElementById('logs-table').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+})();
+
+// AJAX para habilitar/deshabilitar y eliminar cuentas
+(function() {
+  const empresasContainer = document.getElementById('empresas-container');
+  
+  function getCsrfToken() {
+    // Obtener el token CSRF de las cookies
+    const name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  
+  function showMessage(message, isError = false) {
+    const msgDiv = document.createElement('div');
+    msgDiv.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 24px;
+      background: ${isError ? '#dc2626' : '#16a34a'};
+      color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      z-index: 9999;
+      animation: slideIn 0.3s ease-out;
+    `;
+    msgDiv.textContent = message;
+    document.body.appendChild(msgDiv);
+    
+    setTimeout(() => {
+      msgDiv.style.animation = 'slideOut 0.3s ease-in';
+      setTimeout(() => msgDiv.remove(), 300);
+    }, 3000);
+  }
+  
+  // Event delegation para botones de habilitar/deshabilitar
+  empresasContainer.addEventListener('click', function(e) {
+    if (e.target.classList.contains('btn-habilitar') || e.target.closest('.btn-habilitar')) {
+      const btn = e.target.classList.contains('btn-habilitar') ? e.target : e.target.closest('.btn-habilitar');
+      const userId = btn.dataset.userId;
+      const habilitado = btn.dataset.habilitado === 'true';
+      
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+      btn.style.cursor = 'wait';
+      
+      fetch(`/portal/admin/usuarios/${userId}/cambiar-habilitacion/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCsrfToken(),
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Actualizar botón
+          btn.dataset.habilitado = data.habilitado;
+          btn.style.background = data.habilitado ? '#dc2626' : '#16a34a';
+          btn.innerHTML = data.habilitado ? '🚫 Deshabilitar' : '✅ Habilitar';
+          
+          // Actualizar texto de estado
+          const statusElements = document.querySelectorAll(`.empresa-status-${userId} .acceso-text, .cap-acceso-${userId}`);
+          statusElements.forEach(el => {
+            el.innerHTML = data.habilitado 
+              ? '<span style="color:#16a34a">✓ Habilitado</span>' 
+              : '<span style="color:#dc2626">✗ Deshabilitado</span>';
+          });
+          
+          showMessage(data.message);
+        } else {
+          showMessage(data.error || 'Error al cambiar el estado', true);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showMessage('Error al procesar la solicitud', true);
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+      });
+    }
+    
+    // Manejar botones de eliminar
+    if (e.target.classList.contains('btn-eliminar') || e.target.closest('.btn-eliminar')) {
+      const btn = e.target.classList.contains('btn-eliminar') ? e.target : e.target.closest('.btn-eliminar');
+      const userId = btn.dataset.userId;
+      const email = btn.dataset.email;
+      
+      if (!confirm(`¿Estás seguro de eliminar la cuenta de ${email}? Esta acción no se puede deshacer.`)) {
+        return;
+      }
+      
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+      btn.style.cursor = 'wait';
+      
+      fetch(`/portal/admin/usuarios/${userId}/eliminar/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCsrfToken(),
+          'X-Requested-With': 'XMLHttpRequest',
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Eliminar elemento del DOM
+          if (data.role === 'empresa') {
+            // Eliminar toda la sección de empresa
+            const empresaItem = document.querySelector(`.empresa-item[data-empresa-id="${userId}"]`);
+            if (empresaItem) {
+              empresaItem.style.animation = 'fadeOut 0.3s ease-out';
+              setTimeout(() => empresaItem.remove(), 300);
+            }
+          } else if (data.role === 'capacitador') {
+            // Eliminar solo la fila del capacitador
+            const capRow = document.querySelector(`.capacitador-row[data-cap-id="${userId}"]`);
+            if (capRow) {
+              capRow.style.animation = 'fadeOut 0.3s ease-out';
+              setTimeout(() => {
+                capRow.remove();
+                // Verificar si quedan capacitadores en la empresa
+                const empresaId = capRow.dataset.empresaId;
+                const empresaItem = document.querySelector(`.empresa-item[data-empresa-id="${empresaId}"]`);
+                if (empresaItem) {
+                  const remainingCaps = empresaItem.querySelectorAll('.capacitador-row');
+                  if (remainingCaps.length === 0) {
+                    const tableContainer = empresaItem.querySelector('table').parentElement;
+                    tableContainer.innerHTML = '<p style="color:#64748b;font-style:italic;margin-top:8px">Sin capacitadores asociados</p>';
+                  }
+                }
+              }, 300);
+            }
+          }
+          
+          showMessage(data.message);
+        } else {
+          showMessage(data.error || 'Error al eliminar la cuenta', true);
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.style.cursor = 'pointer';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showMessage('Error al procesar la solicitud', true);
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+      });
+    }
+  });
+})();
+
+// Agregar estilos para animaciones
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+  }
+  @keyframes fadeOut {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.95); }
+  }
+`;
+document.head.appendChild(style);
+</script>
+</body>
+</html>

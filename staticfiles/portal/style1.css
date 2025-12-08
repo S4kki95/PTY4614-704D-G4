@@ -1,0 +1,496 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+:root{
+  --blue-900:#0c3b66;
+  --blue-800:#174a7e;
+  --blue-600:#2a66a5;
+  --bg:#f3f7fb;
+  --text:#0f2c4d;
+  --muted:#5f7591;
+  --card:#ffffff;
+  --shadow:0 10px 25px rgba(16,53,89,.08);
+  --radius:16px;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;overflow-x:hidden;width:100%;max-width:100vw;position:relative}
+body {
+  font-family: 'Inter', system-ui, Arial, Helvetica, sans-serif;
+  color: var(--text);
+  background: linear-gradient(135deg, #f3f7fb, #e6f0ff);
+  min-height: 100vh;
+}
+
+/* Header / Navbar */
+.header{
+  background:var(--blue-800);
+  color:#fff;
+  padding:18px 28px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position: relative;
+  z-index: 100;
+}
+.brand{font-weight:800;font-size:22px;letter-spacing:.2px}
+
+/* Hamburger button */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 1001;
+  position: relative;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background: #fff;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(7px, 7px);
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
+.nav-wrapper {
+  display: block;
+}
+
+.nav{list-style:none;display:flex;gap:24px;margin:0;padding:0;align-items:center}
+.nav a{color:#eaf2fb;text-decoration:none;font-weight:600;opacity:.95;white-space:nowrap}
+.nav a:hover{opacity:1;text-decoration:underline}
+
+/* Estilos para usuario autenticado */
+.user-info {
+  color: #fff;
+  font-size: 14px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 6px;
+}
+
+.btn-logout {
+  background: rgba(220, 38, 38, 0.9) !important;
+  color: #fff !important;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  background: rgba(220, 38, 38, 1) !important;
+  text-decoration: none !important;
+}
+
+/* Hero / Carousel */
+.hero{
+  max-width:1100px;margin:24px auto 0; padding:0 24px;
+}
+.slider{
+  position:relative;height:420px;border-radius:18px;overflow:hidden;box-shadow:var(--shadow);
+}
+.track{display:flex;width:300%;height:100%;animation:slide 18s infinite}
+.slide{min-width:100%;height:100%;display:flex;align-items:center;justify-content:flex-start;background-position:center;background-size:cover}
+.overlay{
+  margin-left:48px; max-width:640px; background:rgba(10,34,61,.55);
+  color:#fff;padding:24px 28px;border-radius:14px;backdrop-filter: blur(2px);
+}
+.overlay h1{margin:0 0 8px;font-size:36px;line-height:1.15;font-weight:800}
+.overlay p{margin:0;font-size:16px;opacity:.95}
+
+/* Sections */
+.section{max-width:1100px;margin:28px auto;padding:0 24px}
+.section h2{font-size:28px;margin:8px 0 12px}
+.section p{color:var(--muted);line-height:1.6}
+
+/* Cards grid */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:8px}
+.card{
+  background:var(--card);border-radius:14px;padding:22px;box-shadow:var(--shadow);
+}
+.card h3{margin:4px 0 6px;font-size:18px}
+.card p{margin:0;color:var(--muted);font-size:14px}
+
+/* Icons (inline SVG) */
+.icon{width:38px;height:38px;margin-bottom:6px;opacity:.9}
+
+/* Contact */
+.footer{background:var(--blue-800);color:#dfeaf7;text-align:center;padding:26px;margin-top:auto}
+.footer a{color:#fff;text-decoration:none;font-weight:600}
+.footer a:hover{text-decoration:underline}
+
+@keyframes slide{
+  0%,30%{transform:translateX(0)}
+  35%,65%{transform:translateX(-100%)}
+  70%,100%{transform:translateX(-200%)}
+}
+
+/* Responsive */
+@media (max-width: 900px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .overlay h1{font-size:28px}
+}
+
+@media (max-width: 768px){
+  /* Mostrar hamburger */
+  .hamburger {
+    display: flex;
+  }
+
+  /* Wrapper del menú móvil */
+  .nav-wrapper {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background: var(--blue-900);
+    transition: right 0.4s ease;
+    z-index: 1001;
+    overflow-y: auto;
+    box-shadow: -5px 0 20px rgba(0,0,0,0.5);
+  }
+
+  .nav-wrapper.active {
+    right: 0;
+  }
+
+  /* Estilos del menú */
+  .nav {
+    flex-direction: column;
+    gap: 0;
+    padding: 80px 0 20px;
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .nav li {
+    width: 100%;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .nav a {
+    display: block;
+    padding: 16px 24px;
+    width: 100%;
+    color: #fff !important;
+    white-space: normal;
+    text-decoration: none;
+  }
+
+  .nav a:hover {
+    background: rgba(255,255,255,0.15);
+    text-decoration: none;
+  }
+
+  /* Estilos para usuario autenticado en móvil */
+  .user-info {
+    display: block;
+    padding: 16px 24px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .btn-logout {
+    display: block;
+    width: 100%;
+    padding: 16px 24px !important;
+    text-align: left;
+  }
+
+  /* Hero/Carousel responsive */
+  .hero {
+    padding: 0 15px;
+    margin-top: 20px;
+  }
+
+  .slider {
+    height: 350px;
+  }
+
+  .overlay {
+    margin: 0 20px;
+    padding: 20px;
+  }
+
+  .overlay h1 {
+    font-size: 24px;
+  }
+
+  .overlay p {
+    font-size: 14px;
+  }
+
+  /* Grid responsive */
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .section {
+    padding: 0 15px;
+  }
+}
+
+@media (max-width: 560px){
+  .grid{grid-template-columns:1fr}
+  .overlay{margin:0 16px}
+  .brand{font-size:18px}
+  .header{padding:14px 20px}
+
+  .slider {
+    height: 300px;
+  }
+
+  .overlay h1 {
+    font-size: 20px;
+  }
+
+  .overlay p {
+    font-size: 13px;
+  }
+}
+
+/* Contenedor del formulario */
+
+.form-container {
+  position: relative;
+  overflow: hidden;
+}
+.form-container {
+  max-width: 600px;
+  margin: 40px auto;
+  background: #fff; /* fondo blanco */
+  padding: 30px;
+  border: 1.5px solid #dbeafe; /* borde azul claro */
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(30, 64, 175, 0.15); /* sombra azul */
+  font-family: 'Inter', system-ui, Arial, Helvetica, sans-serif;
+  position: relative; /* necesario para ::before */
+}
+
+.form-container::before {
+  content: "";
+  display: block;
+  height: 10px;
+  width: 100%;
+  background: var(--blue-600);
+  border-radius: 12px 12px 0 0;
+  margin-bottom: 19px;
+}
+
+
+/* Título del formulario */
+.form-container h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: var(--blue-900, #1e3a8a);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Etiquetas */
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--blue-800, #1e40af);
+  letter-spacing: 0.3px;
+}
+
+/* Campos de texto, select y textarea */
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 14px;
+  border: 1.5px solid #cbd6e2;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+  background-color: #fff;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+/* Placeholder con estilo más sutil */
+.form-input::placeholder, 
+.form-textarea::placeholder {
+  color: #9ca3af; /* gris suave */
+  font-style: italic;
+}
+
+/* Enfoque en los campos */
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--blue-600, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+  outline: none;
+}
+
+/* Botón */
+button {
+  width: 100%;
+  padding: 14px;
+  background: var(--blue-800, #1e40af);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: var(--blue-600, #2563eb);
+}
+
+.form-container {
+  background: #fff;
+  border: 1.5px solid #dbeafe; /* azul muy suave */
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(30, 64, 175, 0.15); /* sombra azul */
+}
+
+
+
+html, body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* Mejoras visuales al formulario de anuncios */
+.form-container {
+  max-width: 900px;          /* más ancho para que respire */
+  padding: 40px;
+  margin: 10px auto;         /* más separación arriba y abajo */
+}
+
+.form-container h2 {
+  text-align: center;
+  font-size: 30px;
+  margin-bottom: 30px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--blue-600); /* línea decorativa */
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 700;
+  font-size: 18px;   /* antes 15px */
+  color: var(--blue-900); /* azul más fuerte */
+  letter-spacing: 0.5px;
+}
+
+
+button {
+  margin-top: 10px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+/* Estilo general del modal */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: rgba(0,0,0,0.5);
+  padding-top: 60px;
+}
+
+.modal-content {
+  background: #fff;
+  margin: auto;
+  padding: 30px;
+  border-radius: 12px;
+  width: 40%;
+  max-width: 600px;
+  min-width: 350px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Animación suave */
+@keyframes fadeIn {
+  from {opacity: 0; transform: scale(0.95);}
+  to {opacity: 1; transform: scale(1);}
+}
+
+.cerrar {
+  float: right;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #555;
+}
+.cerrar:hover { color: red; }
+
+/* Estilos del formulario */
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modal-content label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-content button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s ease;
+}
+
+.modal-content button:hover {
+  background: #0056b3;
+}
+

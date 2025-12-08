@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Postulaciones</title>
+  <link rel="stylesheet" href="{% static 'portal/css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'portal/css/practicantes.css' %}">
+</head>
+<body>
+
+{% include 'portal/partials/_header_alumno.html' %}
+
+<section class="section">
+  <h2>Mis Postulaciones</h2>
+
+  {% if postulaciones %}
+    <!-- Vista tabla para desktop -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Título de la práctica</th>
+            <th>Empresa</th>
+            <th>Ubicación</th>
+            <th>Fecha de postulación</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in postulaciones %}
+            <tr>
+              <td>{{ p.anuncio.titulo }}</td>
+              <td>{{ p.anuncio.empresa.company_name }}</td>
+              <td>{{ p.anuncio.ubicacion }}</td>
+              <td>{{ p.fecha_postulacion|date:"d-m-Y" }}</td>
+              <td>
+                {% if p.estado == "pendiente" %}
+                  <span class="status-pendiente">Pendiente</span>
+                {% elif p.estado == "aceptado" %}
+                  <span class="status-aceptado">Aceptado</span>
+                {% elif p.estado == "rechazado" %}
+                  <span class="status-rechazado">Rechazado</span>
+                {% else %}
+                  {{ p.estado }}
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Vista cards para móvil -->
+    <div class="postulaciones-cards">
+      {% for p in postulaciones %}
+        <div class="postulacion-card">
+          <h3>{{ p.anuncio.titulo }}</h3>
+          <div class="card-info">
+            <div class="card-row">
+              <span class="card-label">Empresa:</span>
+              <span class="card-value">{{ p.anuncio.empresa.company_name }}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Ubicación:</span>
+              <span class="card-value">{{ p.anuncio.ubicacion }}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Fecha:</span>
+              <span class="card-value">{{ p.fecha_postulacion|date:"d-m-Y" }}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Estado:</span>
+              <span class="card-value">
+                {% if p.estado == "pendiente" %}
+                  <span class="status-pendiente">Pendiente</span>
+                {% elif p.estado == "aceptado" %}
+                  <span class="status-aceptado">Aceptado</span>
+                {% elif p.estado == "rechazado" %}
+                  <span class="status-rechazado">Rechazado</span>
+                {% else %}
+                  {{ p.estado }}
+                {% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Paginación -->
+    {% if postulaciones.has_other_pages %}
+    <div class="pagination" style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
+      {% if postulaciones.has_previous %}
+        <a href="?page=1" class="btn-secondary">&laquo; Primera</a>
+        <a href="?page={{ postulaciones.previous_page_number }}" class="btn-secondary">Anterior</a>
+      {% endif %}
+
+      <span class="current" style="align-self: center;">
+        Página {{ postulaciones.number }} de {{ postulaciones.paginator.num_pages }}
+      </span>
+
+      {% if postulaciones.has_next %}
+        <a href="?page={{ postulaciones.next_page_number }}" class="btn-secondary">Siguiente</a>
+        <a href="?page={{ postulaciones.paginator.num_pages }}" class="btn-secondary">Última &raquo;</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  {% else %}
+    <p>No tienes postulaciones registradas aún.</p>
+  {% endif %}
+</section>
+
+{% include 'portal/partials/_footer.html' %}
+
+</body>
+</html>

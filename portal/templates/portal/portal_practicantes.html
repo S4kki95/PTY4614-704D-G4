@@ -1,0 +1,124 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal de Prácticas TI – Empresas</title>
+  <link rel="stylesheet" href="{% static 'portal/css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'portal/css/practicantes.css' %}">
+</head>
+<body>
+  {% include 'portal/partials/_header_alumno.html' %}
+
+  {% if messages %}
+    <div style="max-width:1100px;margin:16px auto 0;padding:0 24px;">
+      {% for message in messages %}
+        {% if 'from_login' in message.tags %}
+          <div style="padding:10px;border-radius:6px;margin-bottom:8px; background:#eefcee;color:#065f46;border:1px solid #a7f3d0;">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Hero / Carousel -->
+  <section class="hero">
+    <div class="slider">
+      <div class="track">
+        <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1600&auto=format&fit=crop');">
+          <div class="overlay">
+            <h1>Conecta con las mejores empresas<br> para practicas profesionales</h1>
+            <p>Busca, postula y revisa<br> tus postulaciones!.</p>
+          </div>
+        </div>
+        <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1600&auto=format&fit=crop');">
+          <div class="overlay">
+            <h1>Gestiona tus postulaciones de<br> forma organizada</h1>
+            <p>Postula y da seguimiento a tu<br> proceso para cada postulacion</p>
+          </div>
+        </div>
+        <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=1600&auto=format&fit=crop');">
+          <div class="overlay">
+            <h1>Proceso completo: postulacion,<br> entrevistas y evaluaciones.</h1>
+            <p>Capacitadores asignados y evaluación<br> final con nota y feedback.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sobre Nosotros -->
+  <section class="section" id="nosotros">
+    <h2>Sobre Nosotros</h2>
+    <p>Somos una plataforma diseñada para empresas de tecnología que integran estudiantes en prácticas profesionales.
+       Ofrecemos un ecosistema completo para publicar ofertas, recibir postulaciones, organizar entrevistas y dar seguimiento al proceso de capacitación.</p>
+  </section>
+
+  <!-- Funcionalidades -->
+  <section class="section" id="funcionalidades">
+    <h2>Lo que puedes hacer en el portal</h2>
+
+    <div class="grid">
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 11l18-5v12l-18-5v10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7 22v-8" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <h3>Postular a anuncios de practica</h3>
+        <p>Envia tus postulaciones a los anuncios creados por las empresas</p>
+      </article>
+
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="7" r="4" stroke-width="2"/>
+          <path d="M4 21c0-4 4-7 8-7s8 3 8 7" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <h3>Ver Postulaciones</h3>
+        <p>Accede a tu perfil, currículums y postulaciones en tiempo real.</p>
+      </article>
+
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
+          <path d="M16 2v4M8 2v4M3 10h18" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <h3>Postular a practicas</h3>
+        <p>Envia tus documentos y postula a una practica.</p>
+      </article>
+
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 12l2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="3" y="4" width="18" height="16" rx="2" ry="2" stroke-width="2"/>
+        </svg>
+        <h3>Gestionar postulaciones</h3>
+        <p>Gestiona las postulaciones que hayas hecho y revisa sus estados.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- Prácticas Recientes -->
+  <section class="section" id="recientes">
+    <h2>Prácticas más recientes</h2>
+    {% if ultimas_publicaciones %}
+      <div class="grid">
+        {% for pub in ultimas_publicaciones %}
+        <article class="card">
+          <h3>{{ pub.titulo }}</h3>
+          <p><strong>Empresa:</strong> {{ pub.empresa.company_name|default:pub.empresa.username }}</p>
+          <p>{{ pub.ubicacion }} — {{ pub.get_modalidad_display }}</p>
+          <a href="{% url 'listar_publicaciones' %}?id={{ pub.id }}" style="color: #2563eb; text-decoration: none; font-weight: 500;">Ver detalles &rarr;</a>
+        </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>Aún no se han publicado prácticas.</p>
+    {% endif %}
+  </section>
+
+  {% include 'portal/partials/_footer.html' %}
+
+</body>
+</html>
