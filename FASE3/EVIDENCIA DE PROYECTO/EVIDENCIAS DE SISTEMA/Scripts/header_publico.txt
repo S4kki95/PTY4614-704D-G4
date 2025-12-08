@@ -1,0 +1,51 @@
+{% load static %}
+<header class="header">
+  <div class="brand">Portal de Prácticas TI</div>
+  
+  <!-- Menú hamburguesa (móvil) -->
+  <button class="hamburger" id="hamburger" aria-label="Menú">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <!-- Navegación -->
+  <ul class="nav" id="nav">
+    <li><a href="{% url 'index' %}">Inicio</a></li>
+    <li><a href="{% url 'login' %}">Login</a></li>
+    <li><a href="{% url 'registro' %}">Registro</a></li>
+  </ul>
+</header>
+
+<script>
+  // Toggle menú hamburguesa
+  (function() {
+    const hamburger = document.getElementById('hamburger');
+    const nav = document.getElementById('nav');
+    
+    if (hamburger && nav) {
+      hamburger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        hamburger.classList.toggle('active');
+        nav.classList.toggle('active');
+      });
+
+      // Cerrar al hacer click fuera
+      document.addEventListener('click', function(e) {
+        if (!nav.contains(e.target) && !hamburger.contains(e.target)) {
+          hamburger.classList.remove('active');
+          nav.classList.remove('active');
+        }
+      });
+
+      // Cerrar al hacer click en un enlace
+      const navLinks = nav.querySelectorAll('a');
+      navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          hamburger.classList.remove('active');
+          nav.classList.remove('active');
+        });
+      });
+    }
+  })();
+</script>

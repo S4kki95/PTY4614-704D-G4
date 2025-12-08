@@ -1,0 +1,269 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro - Portal Prácticas TI</title>
+  <link rel="stylesheet" href="{% static 'portal/style3.css' %}">
+  <style>
+    /* Estilos para el menú hamburguesa */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px;
+      z-index: 1001;
+    }
+
+    .hamburger span {
+      width: 25px;
+      height: 3px;
+      background-color: white;
+      margin: 3px 0;
+      transition: all 0.3s ease;
+      border-radius: 2px;
+    }
+
+    .hamburger.active span:nth-child(1) {
+      transform: rotate(45deg) translate(7px, 7px);
+    }
+
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(7px, -7px);
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        padding: 15px 20px;
+      }
+
+      .hamburger {
+        display: flex;
+      }
+
+      .nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 280px;
+        height: 100vh;
+        background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        padding: 80px 0 20px;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+        transition: right 0.3s ease;
+        z-index: 1000;
+        gap: 0;
+      }
+
+      .nav.active {
+        right: 0;
+      }
+
+      .nav li {
+        margin: 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+
+      .nav li a {
+        display: block;
+        padding: 18px 25px;
+        font-size: 16px;
+        transition: all 0.2s;
+      }
+
+      .nav li a:hover {
+        background: rgba(255,255,255,0.1);
+        padding-left: 35px;
+      }
+
+      .section {
+        padding: 20px 15px;
+      }
+
+      .login-container {
+        padding: 20px;
+        margin: 0 auto;
+        max-width: 100%;
+      }
+
+      .login-container h2 {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+      }
+
+      .login-container input[type="text"],
+      .login-container input[type="email"],
+      .login-container input[type="password"],
+      .login-container select {
+        font-size: 16px;
+        width: 100%;
+      }
+
+      .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 15px;
+      }
+
+      .radio-group label {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .radio-group input[type="radio"] {
+        margin-right: 10px;
+        width: 20px;
+        height: 20px;
+      }
+
+      .login-container button {
+        width: 100%;
+        padding: 14px;
+        font-size: 16px;
+      }
+
+      #empresa_field,
+      #capacitador_empresa_field {
+        margin-top: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  {% include 'portal/partials/_header_publico.html' %}
+
+  <section class="section">
+    <div class="login-container">
+      <h2>Crear Cuenta</h2>
+
+      {% if messages %}
+        {% for msg in messages %}
+          <p style="color:red;">{{ msg }}</p>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post">
+  {% csrf_token %}
+  
+  <label for="id_username">Nombre de usuario:</label>
+  {{ form.username }}
+  {% if form.username.errors %}
+    <div class="error">{{ form.username.errors }}</div>
+  {% endif %}
+
+  <label for="id_email">Correo:</label>
+  {{ form.email }}
+  {% if form.email.errors %}
+    <div class="error">{{ form.email.errors }}</div>
+  {% endif %}
+
+  <label for="id_password1">Contraseña:</label>
+  {{ form.password1 }}
+  {% if form.password1.errors %}
+    <div class="error">{{ form.password1.errors }}</div>
+  {% endif %}
+
+  <label for="id_password2">Confirmar contraseña:</label>
+  {{ form.password2 }}
+  {% if form.password2.errors %}
+    <div class="error">{{ form.password2.errors }}</div>
+  {% endif %}
+
+  <label>Rol:</label>
+  <div class="radio-group">
+    {{ form.role }}
+  </div>
+  {% if form.role.errors %}
+    <div class="error">{{ form.role.errors }}</div>
+  {% endif %}
+
+  <div id="empresa_field" style="display:none;">
+    <label for="id_company_name">Nombre de la Empresa:</label>
+    {{ form.company_name }}
+    {% if form.company_name.errors %}
+      <div class="error">{{ form.company_name.errors }}</div>
+    {% endif %}
+  </div>
+
+  <div id="capacitador_empresa_field" style="display:none;">
+    <label for="id_company">Selecciona tu Empresa:</label>
+    {{ form.company }}
+    {% if form.company.errors %}
+      <div class="error">{{ form.company.errors }}</div>
+    {% endif %}
+    {% if form.fields.company.queryset|length == 0 %}
+      <div class="error">No es posible registrarse como capacitador porque no hay empresas registradas.</div>
+    {% endif %}
+  </div>
+
+  <button type="submit">Registrarse</button>
+</form>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const roleSelect = document.getElementById("id_role");
+      const empresaField = document.getElementById("empresa_field");
+      const capacitadorEmpresaField = document.getElementById("capacitador_empresa_field");
+      const companySelect = document.getElementById("id_company");
+      const form = document.querySelector("form");
+
+      function toggleEmpresaField() {
+        empresaField.style.display = (roleSelect.value === "empresa") ? "block" : "none";
+        const showCapacitador = roleSelect.value === "capacitador";
+        capacitadorEmpresaField.style.display = showCapacitador ? "block" : "none";
+        // activar 'required' en el select cuando sea capacitador
+        if (companySelect) {
+          if (showCapacitador) {
+            companySelect.setAttribute("required", "required");
+          } else {
+            companySelect.removeAttribute("required");
+          }
+        }
+      }
+
+      roleSelect.addEventListener("change", toggleEmpresaField);
+      toggleEmpresaField(); // ejecuta al cargar la página
+
+      // Validación cliente: si es capacitador, debe elegir empresa
+      if (form) {
+        form.addEventListener("submit", function(e) {
+          const isCapacitador = roleSelect && roleSelect.value === "capacitador";
+          if (isCapacitador && companySelect && (!companySelect.value || companySelect.value === "")) {
+            e.preventDefault();
+            // mostrar mensaje de error bajo el select si no existe ya
+            let err = capacitadorEmpresaField.querySelector(".error.local-company");
+            if (!err) {
+              err = document.createElement("div");
+              err.className = "error local-company";
+              err.textContent = "Debes seleccionar una empresa para registrarte como capacitador.";
+              capacitadorEmpresaField.appendChild(err);
+            }
+            companySelect.focus();
+          }
+        });
+      }
+    });
+  </script>
+  {% include 'portal/partials/_footer.html' %}
+
+</body>
+</html>

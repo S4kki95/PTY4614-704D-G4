@@ -1,0 +1,219 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal de Prácticas TI – Empresas y practicantes</title>
+  <link rel="stylesheet" href="{% static 'portal/style1.css' %}">
+  <style>
+    /* Estilos para el menú hamburguesa */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px;
+      z-index: 1001;
+    }
+
+    .hamburger span {
+      width: 25px;
+      height: 3px;
+      background-color: white;
+      margin: 3px 0;
+      transition: all 0.3s ease;
+      border-radius: 2px;
+    }
+
+    .hamburger.active span:nth-child(1) {
+      transform: rotate(45deg) translate(7px, 7px);
+    }
+
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(7px, -7px);
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        padding: 15px 20px;
+      }
+
+      .hamburger {
+        display: flex;
+      }
+
+      .nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 280px;
+        height: 100vh;
+        background: linear-gradient(135deg, #004aad 0%, #0066cc 100%);
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        padding: 80px 0 20px;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+        transition: right 0.3s ease;
+        z-index: 1000;
+        gap: 0;
+      }
+
+      .nav.active {
+        right: 0;
+      }
+
+      .nav li {
+        margin: 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+
+      .nav li a {
+        display: block;
+        padding: 18px 25px;
+        font-size: 16px;
+        transition: all 0.2s;
+      }
+
+      .nav li a:hover {
+        background: rgba(255,255,255,0.1);
+        padding-left: 35px;
+      }
+
+      .hero .overlay h1 {
+        font-size: 1.8rem;
+        padding: 0 20px;
+      }
+
+      .hero .overlay p {
+        font-size: 1rem;
+        padding: 0 20px;
+      }
+
+      .section {
+        padding: 40px 20px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .card {
+        padding: 25px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero .overlay h1 {
+        font-size: 1.5rem;
+      }
+
+      .hero .overlay p {
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Prevenir scroll horizontal */
+    body, html {
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+  </style>
+</head>
+<body>
+
+  {% include 'portal/partials/_header_publico.html' %}
+
+  <!-- Hero / Carousel -->
+  <section class="hero">
+    <div class="slider">
+      <div class="track">
+        <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1600&auto=format&fit=crop');">
+          <div class="overlay">
+            <h1>Conecta con el mejor talento en prácticas profesionales</h1>
+            <p>Publica tus ofertas, evalúa postulantes y gestiona su capacitación en un solo lugar.</p>
+          </div>
+        </div>
+        <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=1600&auto=format&fit=crop');">
+          <div class="overlay">
+            <h1>Gestiona entrevistas de forma ágil y organizada</h1>
+            <p>Agenda, confirma y da seguimiento a cada candidato en minutos.</p>
+          </div>
+        </div>
+        <div class="slide" style="background-image:url('https://images.unsplash.com/photo-1513258496099-48168024aec0?q=80&w=1600&auto=format&fit=crop');">
+          <div class="overlay">
+            <h1>Capacita y evalúa con observaciones claras</h1>
+            <p>Capacitadores asignados y evaluación final con nota y feedback.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sobre Nosotros -->
+  <section class="section" id="nosotros">
+    <h2>Sobre Nosotros</h2>
+    <p>Somos una plataforma diseñada para empresas de tecnología que integran estudiantes en prácticas profesionales.
+       Ofrecemos un ecosistema completo para publicar ofertas, recibir postulaciones, organizar entrevistas y dar seguimiento al proceso de capacitación.</p>
+  </section>
+
+  <!-- Funcionalidades -->
+  <section class="section" id="funcionalidades">
+    <h2>Lo que puedes hacer en el portal</h2>
+
+    <div class="grid">
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 11l18-5v12l-18-5v10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7 22v-8" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <h3>Publicar Anuncios</h3>
+        <p>Crea ofertas de práctica y hazlas visibles a cientos de estudiantes de tecnología.</p>
+      </article>
+
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="7" r="4" stroke-width="2"/>
+          <path d="M4 21c0-4 4-7 8-7s8 3 8 7" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <h3>Ver Postulantes</h3>
+        <p>Accede a perfiles, currículums y experiencia de los postulantes en tiempo real.</p>
+      </article>
+
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
+          <path d="M16 2v4M8 2v4M3 10h18" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <h3>Postular a practicas</h3>
+        <p>Envia tus documentos y postula a una practica.</p>
+      </article>
+
+      <article class="card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 12l2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="3" y="4" width="18" height="16" rx="2" ry="2" stroke-width="2"/>
+        </svg>
+        <h3>Gestionar postulaciones</h3>
+        <p>Gestiona las postulaciones que hayas hecho y revisa sus estados.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- Contacto -->
+  <section class="section" id="login">
+    <h2>Practicas mas recientes</h2>
+    <p>Aun no se han publicado practicas.</p>
+  </section>
+
+  {% include 'portal/partials/_footer.html' %}
+
+</body>
+</html>

@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil Postulante</title>
+  <link rel="stylesheet" href="{% static 'portal/style5.css' %}?v=18">
+  <style>
+    .alert { padding:10px; border-radius:6px; margin-bottom:8px; border:1px solid transparent; }
+    .alert-error { background:#fee; color:#900; border-color:#f99; }
+    .alert-success { background:#eefcee; color:#065f46; border-color:#a7f3d0; }
+    .alert-info { background:#eef; border-color:#bbf; }
+
+    /* Responsive para móvil */
+    @media (max-width: 768px) {
+      .section {
+        padding: 20px 15px;
+      }
+
+      .form-container {
+        padding: 20px 15px;
+        margin: 0 auto;
+        max-width: 100%;
+      }
+
+      .form-container h2 {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+      }
+
+      .form-container input,
+      .form-container select,
+      .form-container textarea {
+        font-size: 16px; /* Evita zoom en iOS */
+        width: 100%;
+      }
+
+      .form-container button {
+        width: 100%;
+        padding: 14px;
+        font-size: 16px;
+      }
+
+      /* Botones de CV responsive */
+      .form-container > div[style*="display:flex"] {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+      }
+
+      .form-container > div[style*="display:flex"] a,
+      .form-container > div[style*="display:flex"] button {
+        width: 100% !important;
+        text-align: center !important;
+        padding: 12px 14px !important;
+      }
+    }
+
+    /* Prevenir scroll horizontal */
+    body, html {
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+  </style>
+</head>
+<body>
+
+  {% include 'portal/partials/_header_alumno.html' %}
+
+  <section class="section">
+    {% if messages %}
+      <div style="max-width:900px;margin:0 auto 16px;">
+        {% for message in messages %}
+          {% if 'from_login' not in message.tags %}
+            <div class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}">{{ message }}</div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="form-container">
+      <h2>Perfil de Postulante</h2>
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+  <p style="margin-top:-8px;color:#6b7280;font-size:14px;"></p>
+        <button type="submit">Guardar cambios</button>
+      </form>
+
+      {% if form.instance.cv %}
+  <div style="margin-top:16px; display:flex; gap:10px; align-items:center;">
+    <strong>CV actual:</strong>
+
+    <!-- Ver en el navegador (si el visor puede abrirlo) -->
+    <a href="{% url 'ver_cv_propio' %}" target="_blank" rel="noopener"
+       style="padding:8px 14px; background:#2563eb; color:white; text-decoration:none; border-radius:6px;">
+      Ver CV
+    </a>
+
+    <!-- Descargar forzado (pasa por Django y usa enlace firmado / streaming) -->
+    <a href="{% url 'descargar_cv' %}"
+       style="padding:8px 14px; background:#16a34a; color:white; text-decoration:none; border-radius:6px;">
+      Descargar CV
+    </a>
+
+    <!-- Copiar enlace público al portapapeles -->
+    <button type="button" id="copyCvUrlBtn"
+            data-url="{{ form.instance.cv }}"
+            style="padding:8px 14px; background:#e5e7eb; border:1px solid #d1d5db; border-radius:6px; cursor:pointer;">
+      Copiar enlace
+    </button>
+  </div>
+
+  <script>
+    (function() {
+      const btn = document.getElementById('copyCvUrlBtn');
+      if (!btn) return;
+      btn.addEventListener('click', async () => {
+        const url = btn.getAttribute('data-url');
+        try {
+          await navigator.clipboard.writeText(url);
+          btn.textContent = '¡Copiado!';
+          setTimeout(() => btn.textContent = 'Copiar enlace', 1500);
+        } catch {
+          const input = document.createElement('textarea');
+          input.value = url;
+          document.body.appendChild(input);
+          input.select();
+          document.execCommand('copy');
+          document.body.removeChild(input);
+          btn.textContent = '¡Copiado!';
+          setTimeout(() => btn.textContent = 'Copiar enlace', 1500);
+        }
+      });
+    })();
+  </script>
+{% endif %}
+    </div>
+  </section>
+  {% include 'portal/partials/_footer.html' %}
+  <script>
+    // UI: permite solo números y una K/k al final (máximo 9 caracteres); reemplaza DV si se escribe un 10º carácter
+    (function(){
+      const rutInput = document.querySelector('input[name="rut"]');
+      if(!rutInput) return;
+      rutInput.addEventListener('input', () => {
+        let v = rutInput.value.toUpperCase().replace(/\s+/g, '');
+        v = v.replace(/[\.-]/g, '');
+        v = v.replace(/[^0-9K]/g, '');
+        if (v.length > 0) {
+          const kIndex = v.indexOf('K');
+          if (kIndex !== -1 && kIndex !== v.length - 1) {
+            v = v.replace(/K/g, '');
+          }
+        }
+        if (v.length > 9) {
+          const nuevoDV = v[v.length - 1];
+          v = v.slice(0, 8) + nuevoDV;
+        }
+        rutInput.value = v;
+      });
+    })();
+  </script>
+</body>
+</html>

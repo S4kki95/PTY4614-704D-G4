@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Capacitaciones</title>
+  <link rel="stylesheet" href="{% static 'portal/style2.css' %}?v=15">
+  <style>
+    .card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:14px}
+    .row{display:grid;grid-template-columns:160px 1fr;gap:8px 12px;align-items:start}
+    .card-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .label{color:#64748b;font-weight:600;font-size:14px}
+    .value{color:#0f172a;word-break:break-word}
+    .badge{padding:4px 10px;border-radius:12px;font-size:12px;display:inline-block;font-weight:600}
+    .badge-p{background:#fde68a;color:#92400e}
+    .badge-c{background:#dcfce7;color:#166534}
+    .badge-x{background:#fee2e2;color:#991b1b}
+    .block-title{margin:0 0 12px 0;color:#174a7e;font-size:18px}
+    .ev{padding:12px;border-left:3px solid #2563eb;background:#f8fafc;border-radius:6px;margin-bottom:8px}
+    .ev strong{color:#1e40af}
+    .muted{color:#94a3b8;font-style:italic}
+
+    /* Responsive */
+    @media (max-width: 900px){ 
+      .card-grid{grid-template-columns:1fr} 
+    }
+
+    @media (max-width: 768px) {
+      .section {
+        padding: 0 15px;
+      }
+
+      .section h2 {
+        font-size: 24px;
+        margin-top: 20px;
+      }
+
+      .card {
+        padding: 15px;
+        margin-bottom: 12px;
+      }
+
+      .card-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+      }
+
+      .label {
+        font-size: 13px;
+        margin-bottom: 2px;
+      }
+
+      .value {
+        font-size: 14px;
+        padding-left: 0;
+      }
+
+      .block-title {
+        font-size: 16px;
+        margin-bottom: 10px;
+      }
+
+      .ev {
+        padding: 10px;
+        font-size: 14px;
+      }
+
+      .badge {
+        font-size: 11px;
+        padding: 3px 8px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .card {
+        padding: 12px;
+        border-radius: 8px;
+      }
+
+      .section h2 {
+        font-size: 20px;
+      }
+
+      .block-title {
+        font-size: 15px;
+      }
+
+      .label {
+        font-size: 12px;
+      }
+
+      .value {
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+{% include 'portal/partials/_header_alumno.html' %}
+<section class="section">
+  <h2>Mis capacitaciones</h2>
+
+  {% if fichas %}
+    {% for f in fichas %}
+    <div class="card">
+      <div class="card-grid">
+        <div>
+          <h3 class="block-title">Detalle de capacitación</h3>
+          <div class="row">
+            <div class="label">Capacitación:</div><div class="value">{{ f.nombre_capacitacion }} <span class="muted">({{ f.tipo_capacitacion }})</span></div>
+            <div class="label">Periodo:</div><div class="value">{{ f.fecha_inicio|date:'d-m-Y' }} → {{ f.fecha_termino|date:'d-m-Y' }}</div>
+            <div class="label">Estado:</div>
+            <div class="value">
+              {% if f.estado == 'pendiente' %}<span class="badge badge-p">Pendiente</span>{% endif %}
+              {% if f.estado == 'completada' %}<span class="badge badge-c">Completada</span>{% endif %}
+              {% if f.estado == 'cancelada' %}<span class="badge badge-x">Cancelada</span>{% endif %}
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3 class="block-title">Evaluaciones</h3>
+          {% with evs=f.evaluaciones.all %}
+            {% if evs %}
+              {% for e in evs %}
+                <div class="ev">
+                  <div><strong>{{ e.tipo_evaluacion }}</strong> — {{ e.fecha_evaluacion|date:'d-m-Y' }}</div>
+                  <div>Nota final: <strong>{{ e.nota_final }}</strong></div>
+                </div>
+              {% empty %}
+                <div class="muted">Aún no hay evaluaciones registradas.</div>
+              {% endfor %}
+            {% else %}
+              <div class="muted">Aún no hay evaluaciones registradas.</div>
+            {% endif %}
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p class="muted">Aún no tienes capacitaciones agendadas.</p>
+  {% endif %}
+</section>
+{% include 'portal/partials/_footer.html' %}
+</body>
+</html>
