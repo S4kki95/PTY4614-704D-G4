@@ -164,7 +164,20 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          window.location.reload();
+          // Actualizar el item en la lista lateral
+          const item = document.querySelector(`.anuncio-item[data-id="${data.id}"]`);
+          if (item) {
+            item.querySelector('h4').textContent = data.titulo;
+            item.querySelector('small').innerHTML = `${data.ubicacion} — ${data.modalidad}<br>${data.tipo_practica}`;
+          }
+          
+          // Mostrar mensaje de éxito (opcional: usar un toast o alerta)
+          // alert("Publicación actualizada correctamente.");
+          
+          // Cerrar modal si es móvil
+          if (window.innerWidth <= 768) {
+            cerrarModalGestion();
+          }
         } else {
           const isMobile = window.innerWidth <= 768;
           if (isMobile) {
@@ -175,6 +188,10 @@
             setupForm(document.querySelector("#detalle form"));
           }
         }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert("Ocurrió un error al guardar los cambios.");
       });
     };
   }

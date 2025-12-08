@@ -48,38 +48,7 @@
        style="padding:8px 14px; background:#16a34a; color:white; text-decoration:none; border-radius:6px;">
       Descargar CV
     </a>
-
-    <!-- Copiar enlace público al portapapeles -->
-    <button type="button" id="copyCvUrlBtn"
-            data-url="{{ form.instance.cv }}"
-            style="padding:8px 14px; background:#e5e7eb; border:1px solid #d1d5db; border-radius:6px; cursor:pointer;">
-      Copiar enlace
-    </button>
   </div>
-
-  <script>
-    (function() {
-      const btn = document.getElementById('copyCvUrlBtn');
-      if (!btn) return;
-      btn.addEventListener('click', async () => {
-        const url = btn.getAttribute('data-url');
-        try {
-          await navigator.clipboard.writeText(url);
-          btn.textContent = '¡Copiado!';
-          setTimeout(() => btn.textContent = 'Copiar enlace', 1500);
-        } catch {
-          const input = document.createElement('textarea');
-          input.value = url;
-          document.body.appendChild(input);
-          input.select();
-          document.execCommand('copy');
-          document.body.removeChild(input);
-          btn.textContent = '¡Copiado!';
-          setTimeout(() => btn.textContent = 'Copiar enlace', 1500);
-        }
-      });
-    })();
-  </script>
 {% endif %}
     </div>
   </section>

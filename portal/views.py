@@ -146,7 +146,8 @@ Este es un correo automático, no responder.
     #return render(request, 'portal/portal_empresas.html')
 
 def portal_practicantes(request):
-    return render(request, 'portal/portal_practicantes.html')
+    ultimas_publicaciones = AnuncioPractica.objects.select_related('empresa').order_by('-creado_en')[:4]
+    return render(request, 'portal/portal_practicantes.html', {'ultimas_publicaciones': ultimas_publicaciones})
 
 
 @login_required(login_url='login')
@@ -233,9 +234,16 @@ def editar_publicacion(request, anuncio_id):
             return redirect("gestionar_publicaciones")
         form = AnuncioPracticaForm(request.POST, instance=anuncio)
         if form.is_valid():
-            form.save()
+            anuncio = form.save()
             if request.headers.get("x-requested-with") == "XMLHttpRequest":
-                return JsonResponse({"success": True})
+                return JsonResponse({
+                    "success": True,
+                    "id": anuncio.id,
+                    "titulo": anuncio.titulo,
+                    "ubicacion": anuncio.ubicacion,
+                    "modalidad": anuncio.get_modalidad_display(),
+                    "tipo_practica": anuncio.tipo_practica or "Práctica profesional"
+                })
             messages.success(request, "Anuncio actualizado correctamente.")
             return redirect("gestionar_publicaciones")
     else:
@@ -522,8 +530,13 @@ def listar_publicaciones(request):
 
     # Búsqueda por palabra clave (?q=...)
     q = (request.GET.get('q') or '').strip()
+    anuncio_id = request.GET.get('id')
+
     publicaciones_qs = AnuncioPractica.objects.all()
-    if q:
+    
+    if anuncio_id:
+        publicaciones_qs = publicaciones_qs.filter(id=anuncio_id)
+    elif q:
         publicaciones_qs = publicaciones_qs.filter(
             Q(titulo__icontains=q)
             | Q(descripcion__icontains=q)
@@ -583,8 +596,13 @@ def listar_publicaciones(request):
 
 @login_required(login_url='login')
 def postular_practica(request, anuncio_id):
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
     if request.user.role != "alumno":
-        messages.error(request, "Solo los postulantes pueden postular a prácticas.")
+        msg = "Solo los postulantes pueden postular a prácticas."
+        if is_ajax:
+            return JsonResponse({'success': False, 'message': msg}, status=403)
+        messages.error(request, msg)
         return redirect("index")
 
     perfil = get_object_or_404(PerfilPostulante, user=request.user)
@@ -592,7 +610,10 @@ def postular_practica(request, anuncio_id):
 
     # Verificar si ya está postulado
     if Postulacion.objects.filter(postulante=perfil, anuncio=anuncio).exists():
-        messages.warning(request, "Ya te has postulado a esta práctica.")
+        msg = "Ya te has postulado a esta práctica."
+        if is_ajax:
+            return JsonResponse({'success': False, 'message': msg}, status=400)
+        messages.warning(request, msg)
         return redirect("listar_publicaciones")
 
     # Crear la postulación
@@ -602,7 +623,11 @@ def postular_practica(request, anuncio_id):
         estado="pendiente"
     )
 
-    messages.success(request, "Tu postulación ha sido enviada correctamente.")
+    msg = "Tu postulación ha sido enviada correctamente."
+    if is_ajax:
+        return JsonResponse({'success': True, 'message': msg})
+
+    messages.success(request, msg)
     return redirect("listar_publicaciones")
 
 
@@ -613,7 +638,11 @@ def mis_postulaciones(request):
         return redirect("index")
 
     perfil = PerfilPostulante.objects.get(user=request.user)
-    postulaciones = Postulacion.objects.filter(postulante=perfil).select_related("anuncio", "anuncio__empresa")
+    postulaciones_list = Postulacion.objects.filter(postulante=perfil).select_related("anuncio", "anuncio__empresa").order_by('-fecha_postulacion')
+
+    paginator = Paginator(postulaciones_list, 10)
+    page_number = request.GET.get('page')
+    postulaciones = paginator.get_page(page_number)
 
     return render(request, "portal/mis_postulaciones.html", {
         "postulaciones": postulaciones
@@ -835,19 +864,32 @@ def eliminar_capacitacion(request, ficha_id):
 
 @login_required(login_url='login')
 def cambiar_estado_postulacion(request, postulacion_id, nuevo_estado):
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+
     if request.user.role != "empresa":
-        messages.error(request, "Solo las empresas pueden cambiar el estado de postulaciones.")
+        msg = "Solo las empresas pueden cambiar el estado de postulaciones."
+        if is_ajax:
+            return JsonResponse({'success': False, 'message': msg}, status=403)
+        messages.error(request, msg)
         return redirect("index")
 
     postulacion = get_object_or_404(Postulacion, id=postulacion_id, anuncio__empresa=request.user)
 
     if nuevo_estado not in ["pendiente", "aceptado", "rechazado"]:
-        messages.error(request, "Estado no válido.")
+        msg = "Estado no válido."
+        if is_ajax:
+            return JsonResponse({'success': False, 'message': msg}, status=400)
+        messages.error(request, msg)
         return redirect("ver_postulaciones_empresa")
 
     postulacion.estado = nuevo_estado
     postulacion.save()
-    messages.success(request, f"El estado de la postulación fue cambiado a '{nuevo_estado}'.")
+    
+    msg = f"El estado de la postulación fue cambiado a '{nuevo_estado}'."
+    if is_ajax:
+        return JsonResponse({'success': True, 'message': msg, 'nuevo_estado': nuevo_estado})
+
+    messages.success(request, msg)
     return redirect("ver_postulaciones_empresa")
 
 

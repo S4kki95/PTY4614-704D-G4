@@ -640,20 +640,27 @@
   }
 
   .slider {
-    height: 350px;
+    height: 300px;
   }
 
   .overlay {
-    margin-left: 20px;
-    padding: 18px 20px;
+    margin-left: 10px;
+    margin-right: 10px;
+    padding: 14px 16px;
+    max-width: calc(100% - 20px);
+    width: calc(100% - 20px);
   }
 
   .overlay h1 {
-    font-size: 28px;
+    font-size: 20px;
+    line-height: 1.2;
+    word-wrap: break-word;
   }
 
   .overlay p {
-    font-size: 14px;
+    font-size: 12px;
+    line-height: 1.4;
+    word-wrap: break-word;
   }
 
   .grid {

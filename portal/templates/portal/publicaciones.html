@@ -103,7 +103,8 @@
 
 <script>
   const publicaciones = {{ publicaciones_json|safe }};
-  const postulaciones = {{ postulaciones|safe }};
+  // Convertimos a Set para manejo más fácil, aunque array está bien
+  let postulaciones = {{ postulaciones|safe }}; 
 
   function mostrarDetalle(id) {
     const pub = publicaciones.find(p => p.id === id);
@@ -112,6 +113,8 @@
     const isMobile = window.innerWidth <= 768;
     
     if (!pub) return;
+
+    const yaPostulado = postulaciones.includes(pub.id);
 
     const contenidoHTML = `
       <h3>${pub.titulo}</h3>
@@ -125,11 +128,13 @@
       <p><strong>Descripción:</strong> ${pub.descripcion}</p>
       <p><strong>Cupos disponibles:</strong> ${pub.cupos}</p>
       <p><strong>Fecha publicación:</strong> ${pub.creado_en}</p>
+      <div id="accion-postular-${pub.id}">
       ${
-        postulaciones.includes(pub.id)
-        ? '<button class="btn-disabled">Ya postulado</button>'
-        : `<a href="/portal/publicaciones/postular/${pub.id}/" class="btn-primary">Postular</a>`
+        yaPostulado
+        ? '<button class="btn-disabled" disabled>Ya postulado</button>'
+        : `<button onclick="postular(${pub.id})" class="btn-primary">Postular</button>`
       }
+      </div>
     `;
 
     if (isMobile) {
@@ -144,11 +149,65 @@
     }
   }
 
+  function postular(id) {
+    const contenedor = document.getElementById(`accion-postular-${id}`);
+    const btn = contenedor ? contenedor.querySelector('button') : null;
+    
+    if(btn) {
+        btn.disabled = true;
+        btn.textContent = "Enviando...";
+    }
+
+    fetch(`/portal/publicaciones/postular/${id}/`, {
+      method: 'GET',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar lista local de postulaciones
+        postulaciones.push(id);
+        
+        // Actualizar UI
+        if (contenedor) {
+            contenedor.innerHTML = '<button class="btn-disabled" disabled>Ya postulado</button>';
+        }
+        // Opcional: Mostrar notificación toast en lugar de alert
+        // alert(data.message);
+      } else {
+        alert(data.message);
+        if(btn) {
+            btn.disabled = false;
+            btn.textContent = "Postular";
+        }
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert("Ocurrió un error al procesar la solicitud.");
+      if(btn) {
+            btn.disabled = false;
+            btn.textContent = "Postular";
+        }
+    });
+  }
+
   function cerrarModal() {
     document.getElementById('modalOverlay').classList.remove('active');
     document.getElementById('modalBottom').classList.remove('active');
     document.body.style.overflow = '';
   }
+
+  // Auto-abrir detalle si viene un ID en la URL
+  window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+    if (id) {
+       mostrarDetalle(parseInt(id));
+    }
+  });
 </script>
 
 </body>

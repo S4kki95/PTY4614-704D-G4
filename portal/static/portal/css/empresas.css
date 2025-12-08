@@ -981,8 +981,24 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .hero .overlay {
+    margin-left: 10px;
+    margin-right: 10px;
+    padding: 14px 16px;
+    max-width: calc(100% - 20px);
+    width: calc(100% - 20px);
+  }
+
   .hero .overlay h1 {
-    font-size: 28px;
+    font-size: 20px;
+    line-height: 1.2;
+    word-wrap: break-word;
+  }
+
+  .hero .overlay p {
+    font-size: 12px;
+    line-height: 1.4;
+    word-wrap: break-word;
   }
 }
 

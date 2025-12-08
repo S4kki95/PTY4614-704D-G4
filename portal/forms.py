@@ -18,7 +18,7 @@ class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(
         label="Correo",
         widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "tu@correo.com"}),
-        validators=[EmailValidator(message="Ingresa un correo válido.")],
+        error_messages={'invalid': "Ingresa un correo válido."},
     )
 
     class Meta:
@@ -45,6 +45,15 @@ class CustomUserCreationForm(UserCreationForm):
         for name, field in self.fields.items():
             if hasattr(field.widget, "attrs"):
                 field.widget.attrs.setdefault("class", "form-control")
+
+    def clean_username(self):
+        username = self.cleaned_data.get("username")
+        if username:
+            if len(username) < 4:
+                raise forms.ValidationError("El nombre de usuario debe tener al menos 4 caracteres.")
+            if " " in username:
+                raise forms.ValidationError("El nombre de usuario no puede contener espacios.")
+        return username
 
     def clean(self):
         cleaned_data = super().clean()
@@ -76,9 +85,9 @@ class AnuncioPracticaForm(forms.ModelForm):
         widget=forms.Select(attrs={"class": "form-select"}),
     )
     cantidad_horas = forms.IntegerField(
-        min_value=1,
+        min_value=180,
         label="Cantidad de horas",
-        widget=forms.NumberInput(attrs={"class": "form-input", "placeholder": "Ej: 180"}),
+        widget=forms.NumberInput(attrs={"class": "form-input", "placeholder": "Ej: 180", "min": "180"}),
     )
     class Meta:
         model = AnuncioPractica
@@ -97,17 +106,20 @@ class AnuncioPracticaForm(forms.ModelForm):
         widgets = {
             "titulo": forms.TextInput(attrs={
                 "class": "form-input",
-                "placeholder": "Ej: Desarrollador Backend Django"
+                "placeholder": "Ej: Desarrollador Backend Django",
+                "minlength": "10"
             }),
             "descripcion": forms.Textarea(attrs={
                 "class": "form-textarea",
                 "rows": 4,
-                "placeholder": "Describe las responsabilidades, objetivos y tareas principales..."
+                "placeholder": "Describe las responsabilidades, objetivos y tareas principales...",
+                "minlength": "10"
             }),
             "requisitos": forms.Textarea(attrs={
                 "class": "form-textarea",
                 "rows": 3,
-                "placeholder": "Indica las habilidades o conocimientos requeridos (ej: Python, SQL, trabajo en equipo...)"
+                "placeholder": "Indica las habilidades o conocimientos requeridos (ej: Python, SQL, trabajo en equipo...)",
+                "minlength": "10"
             }),
             "tipo_practica": forms.Select(attrs={
                 "class": "form-select"
@@ -117,7 +129,8 @@ class AnuncioPracticaForm(forms.ModelForm):
             }),
             "ubicacion": forms.TextInput(attrs={
                 "class": "form-input",
-                "placeholder": "Ej: Santiago, Chile"
+                "placeholder": "Ej: Santiago, Chile",
+                "minlength": "10"
             }),
             "modalidad": forms.Select(attrs={
                 "class": "form-select"
@@ -129,6 +142,30 @@ class AnuncioPracticaForm(forms.ModelForm):
             }),
         }
 
+    def clean_titulo(self):
+        titulo = self.cleaned_data.get('titulo')
+        if len(titulo) < 10:
+            raise forms.ValidationError("El título debe tener al menos 10 caracteres.")
+        return titulo
+
+    def clean_descripcion(self):
+        descripcion = self.cleaned_data.get('descripcion')
+        if len(descripcion) < 10:
+            raise forms.ValidationError("La descripción debe tener al menos 10 caracteres.")
+        return descripcion
+
+    def clean_requisitos(self):
+        requisitos = self.cleaned_data.get('requisitos')
+        if len(requisitos) < 10:
+            raise forms.ValidationError("Los requisitos deben tener al menos 10 caracteres.")
+        return requisitos
+
+    def clean_ubicacion(self):
+        ubicacion = self.cleaned_data.get('ubicacion')
+        if len(ubicacion) < 10:
+            raise forms.ValidationError("La ubicación debe tener al menos 10 caracteres.")
+        return ubicacion
+
         
 
 class EmailLoginForm(AuthenticationForm):
@@ -136,6 +173,10 @@ class EmailLoginForm(AuthenticationForm):
         label="Correo o Usuario",
         widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "Correo o nombre de usuario"})
     )
+    error_messages = {
+        "invalid_login": "Por favor ingresa un usuario y contraseña correctos. Ten en cuenta que ambos campos pueden distinguir mayúsculas y minúsculas.",
+        "inactive": "Esta cuenta está inactiva.",
+    }
 
 class PerfilEmpresaForm(forms.ModelForm):
     class Meta:
@@ -153,8 +194,8 @@ class PerfilPostulanteForm(forms.ModelForm):
     # Campo de subida de archivo (no vinculado directamente al modelo)
     cv_file = forms.FileField(
         required=False,
-        label="CV",
-        widget=forms.FileInput(attrs={"class": "form-control"})
+        label="CV (PDF, máx 1MB)",
+        widget=forms.FileInput(attrs={"class": "form-control", "accept": ".pdf"})
     )
     # Restringir longitudes y caracteres permitidos en nombres (solo letras y espacios)
     nombre = forms.CharField(
@@ -164,7 +205,8 @@ class PerfilPostulanteForm(forms.ModelForm):
             "class": "form-control",
             "maxlength": "25",
             "pattern": r"^[A-Za-zÁÉÍÓÚáéíóúÑñ]{1,25}$",
-            "title": "Solo letras (sin espacios, máx. 25 caracteres)"
+            "title": "Solo letras (sin espacios, máx. 25 caracteres)",
+            "oninput": "this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ]/g, '')"
         }),
     )
     apellido_pat = forms.CharField(
@@ -174,7 +216,8 @@ class PerfilPostulanteForm(forms.ModelForm):
             "class": "form-control",
             "maxlength": "25",
             "pattern": r"^[A-Za-zÁÉÍÓÚáéíóúÑñ]{1,25}$",
-            "title": "Solo letras (sin espacios, máx. 25 caracteres)"
+            "title": "Solo letras (sin espacios, máx. 25 caracteres)",
+            "oninput": "this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ]/g, '')"
         }),
     )
     apellido_mat = forms.CharField(
@@ -185,7 +228,8 @@ class PerfilPostulanteForm(forms.ModelForm):
             "class": "form-control",
             "maxlength": "25",
             "pattern": r"^[A-Za-zÁÉÍÓÚáéíóúÑñ]{1,25}$",
-            "title": "Solo letras (sin espacios, máx. 25 caracteres)"
+            "title": "Solo letras (sin espacios, máx. 25 caracteres)",
+            "oninput": "this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ]/g, '')"
         }),
     )
 
@@ -206,9 +250,10 @@ class PerfilPostulanteForm(forms.ModelForm):
                 "class": "form-control",
                 "inputmode": "numeric",
                 "maxlength": "9",
-                "pattern": r"^[0-9]{1,9}$",
+                "pattern": r"^[0-9]{8,9}$",
                 "placeholder": "Ej: 912345678",
-                "title": "Solo dígitos (máximo 9). No incluyas código de país (+56)."
+                "title": "Solo dígitos (8 o 9). No incluyas código de país (+56).",
+                "oninput": "this.value = this.value.replace(/[^0-9]/g, '')"
             }),
             "institucion": forms.Select(attrs={"class": "form-control"}),
         }
@@ -225,6 +270,17 @@ class PerfilPostulanteForm(forms.ModelForm):
                 self.fields["institucion"].choices = [("", "Selecciona una institución...")] + choices
 
     # (Revertido) validación estricta de CV eliminada a solicitud.
+
+    def clean_cv_file(self):
+        cv = self.cleaned_data.get('cv_file')
+        if cv:
+            # Validar extensión
+            if not cv.name.lower().endswith('.pdf'):
+                raise ValidationError("Solo se permiten archivos en formato PDF.")
+            # Validar tamaño (1 MB = 1024 * 1024 bytes)
+            if cv.size > 1024 * 1024:
+                raise ValidationError("El archivo PDF no debe superar 1 MB.")
+        return cv
 
     def clean_nombre(self):
         import re
@@ -253,6 +309,8 @@ class PerfilPostulanteForm(forms.ModelForm):
             return value
         if not value.isdigit():
             raise ValidationError("El teléfono debe contener solo dígitos, sin + ni espacios.")
+        if len(value) < 8:
+            raise ValidationError("El teléfono debe tener al menos 8 dígitos.")
         if len(value) > 9:
             raise ValidationError("El teléfono no debe superar 9 dígitos. No incluyas código de país (+56).")
         return value

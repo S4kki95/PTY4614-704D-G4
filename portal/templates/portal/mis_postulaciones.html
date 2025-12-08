@@ -88,6 +88,25 @@
         </div>
       {% endfor %}
     </div>
+
+    <!-- Paginación -->
+    {% if postulaciones.has_other_pages %}
+    <div class="pagination" style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
+      {% if postulaciones.has_previous %}
+        <a href="?page=1" class="btn-secondary">&laquo; Primera</a>
+        <a href="?page={{ postulaciones.previous_page_number }}" class="btn-secondary">Anterior</a>
+      {% endif %}
+
+      <span class="current" style="align-self: center;">
+        Página {{ postulaciones.number }} de {{ postulaciones.paginator.num_pages }}
+      </span>
+
+      {% if postulaciones.has_next %}
+        <a href="?page={{ postulaciones.next_page_number }}" class="btn-secondary">Siguiente</a>
+        <a href="?page={{ postulaciones.paginator.num_pages }}" class="btn-secondary">Última &raquo;</a>
+      {% endif %}
+    </div>
+    {% endif %}
   {% else %}
     <p>No tienes postulaciones registradas aún.</p>
   {% endif %}

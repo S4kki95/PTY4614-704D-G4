@@ -50,6 +50,35 @@
     <script>
       const IS_EMPRESA = (document.body.dataset.role === 'empresa');
 
+      function cambiarEstado(id, nuevoEstado, url) {
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Actualizar el item de la lista
+                const item = document.querySelector(`.postulante-item[data-id="${id}"]`);
+                if (item) {
+                    item.dataset.estado = nuevoEstado;
+                    // Si está activo (mostrándose), refrescar el detalle
+                    if (item.classList.contains('active')) {
+                        mostrarDetalle(item);
+                    }
+                }
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Ocurrió un error al procesar la solicitud.");
+        });
+      }
+
       document.addEventListener('click', (e) => {
         const card = e.target.closest('.postulante-item');
         if (card && card.dataset.id) {
@@ -76,8 +105,8 @@
         else acciones += '<span style="color:#6b7280;">Sin CV</span>';
         
         if (IS_EMPRESA) {
-          if (d.estado !== 'aceptado') acciones += ' <a class="btn-s btn-acc" href="' + d.acceptUrl + '">Aceptar</a>';
-          if (d.estado !== 'rechazado') acciones += ' <a class="btn-s btn-rej" href="' + d.rejectUrl + '">Rechazar</a>';
+          if (d.estado !== 'aceptado') acciones += ' <button class="btn-s btn-acc" onclick="cambiarEstado(' + d.id + ', \'aceptado\', \'' + d.acceptUrl + '\')">Aceptar</button>';
+          if (d.estado !== 'rechazado') acciones += ' <button class="btn-s btn-rej" onclick="cambiarEstado(' + d.id + ', \'rechazado\', \'' + d.rejectUrl + '\')">Rechazar</button>';
         }
         
         const html =

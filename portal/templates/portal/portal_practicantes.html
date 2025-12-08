@@ -99,10 +99,23 @@
     </div>
   </section>
 
-  <!-- Contacto -->
-  <section class="section" id="login">
-    <h2>Practicas mas recientes</h2>
-    <p>Aun no se han publicado practicas.</p>
+  <!-- Prácticas Recientes -->
+  <section class="section" id="recientes">
+    <h2>Prácticas más recientes</h2>
+    {% if ultimas_publicaciones %}
+      <div class="grid">
+        {% for pub in ultimas_publicaciones %}
+        <article class="card">
+          <h3>{{ pub.titulo }}</h3>
+          <p><strong>Empresa:</strong> {{ pub.empresa.company_name|default:pub.empresa.username }}</p>
+          <p>{{ pub.ubicacion }} — {{ pub.get_modalidad_display }}</p>
+          <a href="{% url 'listar_publicaciones' %}?id={{ pub.id }}" style="color: #2563eb; text-decoration: none; font-weight: 500;">Ver detalles &rarr;</a>
+        </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>Aún no se han publicado prácticas.</p>
+    {% endif %}
   </section>
 
   {% include 'portal/partials/_footer.html' %}
