@@ -35,6 +35,8 @@ urlpatterns = [
     path("admin/analytics/", views.admin_analytics, name="admin_analytics"),
     # Friendly alias to avoid confusion with Django Admin at /admin/
     path("analytics/", views.admin_analytics, name="analytics"),
+    # AJAX endpoint para logs
+    path("admin/logs-ajax/", views.admin_logs_ajax, name="admin_logs_ajax"),
     # Cambiar habilitación de cuentas
     path("admin/usuarios/<int:user_id>/cambiar-habilitacion/", views.cambiar_habilitacion_cuenta, name="cambiar_habilitacion_cuenta"),
     # Eliminar cuentas

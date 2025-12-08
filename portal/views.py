@@ -17,8 +17,9 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.mail import send_mail
 from supabase import create_client, Client
 from django.db.models import Q, Count
+from django.db.models.functions import Lower
 
-from portal.models import AnuncioPractica, PerfilEmpresa, PerfilPostulante, Postulacion, FichaCapacitacion 
+from portal.models import AnuncioPractica, PerfilEmpresa, PerfilPostulante, Postulacion, FichaCapacitacion, CustomUser 
 from decimal import Decimal
 from .forms import EmailLoginForm, PerfilEmpresaForm, PerfilPostulanteForm, FichaCapacitacionForm, RegistroEvaluacionForm
 from .forms import CustomUserCreationForm, AnuncioPracticaForm
@@ -926,6 +927,11 @@ def admin_analytics(request):
     total_postulaciones = post_qs.count()
     total_rechazadas = post_qs.filter(estado='rechazado').count()
     total_aceptadas = post_qs.filter(estado='aceptado').count()
+    
+    # Nuevos KPIs
+    total_anuncios = AnuncioPractica.objects.count()
+    total_alumnos = CustomUser.objects.filter(role='alumno').count()
+    total_empresas_kpi = CustomUser.objects.filter(role='empresa').count()
 
     # Cuentas creadas por institución (sobre usuarios alumno). Usamos date_joined para rango
     perfil_qs = PerfilPostulante.objects.select_related('user')
@@ -935,7 +941,8 @@ def admin_analytics(request):
         perfil_qs = perfil_qs.filter(user__date_joined__date__lte=end)
     cuentas_por_inst = (
         perfil_qs
-        .values('institucion')
+        .annotate(institucion_lower=Lower('institucion'))
+        .values('institucion_lower')
         .annotate(cantidad=Count('id'))
         .order_by('-cantidad')
     )
@@ -943,7 +950,33 @@ def admin_analytics(request):
     # Postulaciones por institución
     posts_por_inst = (
         post_qs
-        .values('postulante__institucion')
+        .annotate(inst_lower=Lower('postulante__institucion'))
+        .values('inst_lower')
+        .annotate(cantidad=Count('id'))
+        .order_by('-cantidad')
+    )
+    
+    # Postulaciones por modalidad
+    posts_por_modalidad = (
+        post_qs
+        .annotate(mod_lower=Lower('anuncio__modalidad'))
+        .values('mod_lower')
+        .annotate(cantidad=Count('id'))
+        .order_by('-cantidad')
+    )
+    
+    # Top 5 Empresas con más postulaciones
+    top_empresas = (
+        post_qs
+        .values('anuncio__empresa__company_name', 'anuncio__empresa__username')
+        .annotate(cantidad=Count('id'))
+        .order_by('-cantidad')[:5]
+    )
+    
+    # Usuarios por rol
+    usuarios_por_rol = (
+        CustomUser.objects
+        .values('role')
         .annotate(cantidad=Count('id'))
         .order_by('-cantidad')
     )
@@ -951,7 +984,8 @@ def admin_analytics(request):
     # Rechazadas por institución
     rechazos_por_inst = (
         post_qs.filter(estado='rechazado')
-        .values('postulante__institucion')
+        .annotate(inst_lower=Lower('postulante__institucion'))
+        .values('inst_lower')
         .annotate(cantidad=Count('id'))
         .order_by('-cantidad')
     )
@@ -959,24 +993,49 @@ def admin_analytics(request):
     # Tipos de práctica más postulados
     por_tipo = (
         post_qs
-        .values('anuncio__tipo_practica')
+        .annotate(tipo_lower=Lower('anuncio__tipo_practica'))
+        .values('tipo_lower')
         .annotate(cantidad=Count('id'))
         .order_by('-cantidad')
     )
 
-    # Logs recientes (si existe el modelo)
+    # Logs recientes con filtros adicionales y paginación
     try:
         from .models import PostulacionLog
-        logs = PostulacionLog.objects.select_related('postulacion', 'postulante', 'anuncio')
+        logs = PostulacionLog.objects.select_related('postulacion', 'postulante', 'anuncio').order_by('-creado_en')
+        
+        # Filtros existentes
         if start:
             logs = logs.filter(creado_en__date__gte=start)
         if end:
             logs = logs.filter(creado_en__date__lte=end)
         if institucion:
             logs = logs.filter(institucion=institucion)
-        logs = logs[:100]
+        
+        # Nuevos filtros para logs
+        log_tipo = request.GET.get('log_tipo', '')
+        log_estado = request.GET.get('log_estado', '')
+        log_institucion = request.GET.get('log_institucion', '')
+        
+        if log_tipo:
+            logs = logs.filter(accion=log_tipo)
+        if log_estado:
+            logs = logs.filter(new_estado=log_estado)
+        if log_institucion:
+            logs = logs.filter(institucion=log_institucion)
+        
+        # Paginación (10 por página)
+        paginator = Paginator(logs, 10)
+        page = request.GET.get('page', 1)
+        try:
+            logs_page = paginator.page(page)
+        except PageNotAnInteger:
+            logs_page = paginator.page(1)
+        except EmptyPage:
+            logs_page = paginator.page(paginator.num_pages)
     except Exception:
-        logs = []
+        logs_page = []
+        paginator = None
 
     # Opciones para selects
     instituciones = list(
@@ -985,7 +1044,7 @@ def admin_analytics(request):
     tipos = list(AnuncioPractica.objects.values_list('tipo_practica', flat=True).distinct())
 
     # NUEVO: Obtener empresas con sus capacitadores
-    from .models import CustomUser
+    # from .models import CustomUser (Removed global import)
     empresas = CustomUser.objects.filter(role='empresa').prefetch_related('capacitadores').order_by('-date_joined')
     
     # Crear estructura de datos: empresa con sus capacitadores
@@ -999,7 +1058,10 @@ def admin_analytics(request):
 
     return render(request, 'portal/admin_analytics.html', {
         'filters': {
-            'start': start or '', 'end': end or '', 'institucion': institucion, 'tipo': tipo, 'estado': estado
+            'start': start or '', 'end': end or '', 'institucion': institucion, 'tipo': tipo, 'estado': estado,
+            'log_tipo': request.GET.get('log_tipo', ''),
+            'log_estado': request.GET.get('log_estado', ''),
+            'log_institucion': request.GET.get('log_institucion', ''),
         },
         'instituciones': instituciones,
         'tipos': tipos,
@@ -1007,29 +1069,96 @@ def admin_analytics(request):
             'total_postulaciones': total_postulaciones,
             'total_aceptadas': total_aceptadas,
             'total_rechazadas': total_rechazadas,
+            'total_anuncios': total_anuncios,
+            'total_alumnos': total_alumnos,
+            'total_empresas': total_empresas_kpi,
         },
         'cuentas_por_inst': list(cuentas_por_inst),
         'posts_por_inst': list(posts_por_inst),
         'rechazos_por_inst': list(rechazos_por_inst),
         'por_tipo': list(por_tipo),
-        'logs': logs,
+        'posts_por_modalidad': list(posts_por_modalidad),
+        'top_empresas': list(top_empresas),
+        'usuarios_por_rol': list(usuarios_por_rol),
+        'logs_page': logs_page,
         'empresas_con_capacitadores': empresas_con_capacitadores,
     })
+
+
+@login_required
+def admin_logs_ajax(request):
+    """Endpoint AJAX para cargar logs filtrados sin recargar la página"""
+    if not request.user.is_staff:
+        return JsonResponse({'error': 'Acceso denegado'}, status=403)
+    
+    try:
+        from .models import PostulacionLog
+        logs = PostulacionLog.objects.select_related('postulacion', 'postulante', 'anuncio').order_by('-creado_en')
+        
+        # Aplicar filtros
+        log_tipo = request.GET.get('log_tipo', '')
+        log_estado = request.GET.get('log_estado', '')
+        log_institucion = request.GET.get('log_institucion', '')
+        
+        if log_tipo:
+            logs = logs.filter(accion=log_tipo)
+        if log_estado:
+            logs = logs.filter(new_estado=log_estado)
+        if log_institucion:
+            logs = logs.filter(institucion=log_institucion)
+        
+        # Paginación
+        paginator = Paginator(logs, 10)
+        page = request.GET.get('page', 1)
+        try:
+            logs_page = paginator.page(page)
+        except PageNotAnInteger:
+            logs_page = paginator.page(1)
+        except EmptyPage:
+            logs_page = paginator.page(paginator.num_pages)
+        
+        # Construir datos JSON
+        logs_data = []
+        for log in logs_page:
+            logs_data.append({
+                'fecha': log.creado_en.strftime('%d-%m-%Y %H:%M'),
+                'accion': log.get_accion_display(),
+                'postulacion_id': log.postulacion_id,
+                'old_estado': log.old_estado or '',
+                'new_estado': log.new_estado or '',
+                'institucion': log.institucion or '-',
+                'anuncio': log.anuncio.titulo if log.anuncio else '-',
+            })
+        
+        return JsonResponse({
+            'logs': logs_data,
+            'has_previous': logs_page.has_previous(),
+            'has_next': logs_page.has_next(),
+            'current_page': logs_page.number,
+            'total_pages': paginator.num_pages,
+            'previous_page': logs_page.previous_page_number() if logs_page.has_previous() else None,
+            'next_page': logs_page.next_page_number() if logs_page.has_next() else None,
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 @login_required
 def cambiar_habilitacion_cuenta(request, user_id):
     """Permite al admin habilitar/deshabilitar cuentas de empresas y capacitadores"""
     if not request.user.is_staff:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'No tienes permisos para realizar esta acción.'}, status=403)
         messages.error(request, "No tienes permisos para realizar esta acción.")
         return redirect('index')
     
-    from .models import CustomUser
     try:
         usuario = CustomUser.objects.get(id=user_id)
         
         # Solo permitir cambiar estado de empresas y capacitadores
         if usuario.role not in ['empresa', 'capacitador']:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'error': 'Solo se puede cambiar el estado de empresas y capacitadores.'}, status=400)
             messages.error(request, "Solo se puede cambiar el estado de empresas y capacitadores.")
             return redirect('admin_analytics')
         
@@ -1038,9 +1167,21 @@ def cambiar_habilitacion_cuenta(request, user_id):
         usuario.save()
         
         estado_texto = "habilitada" if usuario.habilitado else "deshabilitada"
+        
+        # Si es AJAX, devolver JSON
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True, 
+                'habilitado': usuario.habilitado,
+                'is_active': usuario.is_active,
+                'message': f"Cuenta de {usuario.email} {estado_texto} exitosamente."
+            })
+        
         messages.success(request, f"Cuenta de {usuario.email} {estado_texto} exitosamente.")
         
     except CustomUser.DoesNotExist:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Usuario no encontrado.'}, status=404)
         messages.error(request, "Usuario no encontrado.")
     
     return redirect('admin_analytics')
@@ -1050,28 +1191,48 @@ def cambiar_habilitacion_cuenta(request, user_id):
 def eliminar_cuenta(request, user_id):
     """Permite al admin eliminar cuentas de empresas y capacitadores"""
     if not request.user.is_staff:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'No tienes permisos para realizar esta acción.'}, status=403)
         messages.error(request, "No tienes permisos para realizar esta acción.")
         return redirect('index')
     
-    from .models import CustomUser
     try:
         usuario = CustomUser.objects.get(id=user_id)
         
         # Evitar que el admin se elimine a sí mismo
         if usuario.id == request.user.id:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'error': 'No puedes eliminar tu propia cuenta.'}, status=400)
             messages.error(request, "No puedes eliminar tu propia cuenta.")
             return redirect('admin_analytics')
         
         # Evitar eliminar otros superusuarios
         if usuario.is_superuser:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'error': 'No se pueden eliminar cuentas de superusuarios.'}, status=400)
             messages.error(request, "No se pueden eliminar cuentas de superusuarios.")
             return redirect('admin_analytics')
         
         email = usuario.email
+        role = usuario.role
+        company_id = usuario.company_id if hasattr(usuario, 'company_id') and usuario.company_id else None
+        
         usuario.delete()
+        
+        # Si es AJAX, devolver JSON
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'message': f"Cuenta de {email} eliminada exitosamente.",
+                'role': role,
+                'company_id': company_id
+            })
+        
         messages.success(request, f"Cuenta de {email} eliminada exitosamente.")
         
     except CustomUser.DoesNotExist:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Usuario no encontrado.'}, status=404)
         messages.error(request, "Usuario no encontrado.")
     
     return redirect('admin_analytics')

@@ -19,8 +19,9 @@
         <li><a href="{% url 'gestionar_publicaciones' %}">Gestionar Publicaciones</a></li>
       {% endif %}
       
+      {% if user.role == 'capacitador' %}
       <li><a href="{% url 'capacitaciones' %}">Capacitación</a></li>
-      
+      {% endif %}
       {% if user.role == 'empresa' %}
         <li><a href="{% url 'perfil_empresa' %}">Perfil</a></li>
       {% endif %}
